@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  derailed:
+    build: derailed
+    hostname: derailed
+    container_name: derailed-service
+    restart: on-failure
+    ports:
+      - "8080:80"
+
+volumes:
+  derailed-data:
