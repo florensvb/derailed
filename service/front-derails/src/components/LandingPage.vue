@@ -1,31 +1,1 @@
-<template>
-  <v-container>
-    <v-layout
-      text-xs-center
-      wrap
-    >
-      <v-flex xs12>
-        <v-img
-          :src="require('../assets/logo.jpg')"
-          class="my-3"
-          contain
-          height="200"
-        ></v-img>
-      </v-flex>
-
-      <v-flex mb-4>
-        <h1 class="display-2 font-weight-bold mb-3">
-          Welcome to <strong>DErAileD</strong>
-        </h1>
-      </v-flex>
-    </v-layout>
-  </v-container>
-</template>
-
-<script>
-  export default {
-    data: () => ({
-      // Data goes here
-    })
-  }
-</script>
+<template>  <v-container>    <v-layout      text-xs-center      wrap    >      <v-flex xs12>        <v-img          :src="require('../assets/logo.jpg')"          class="my-3"          contain          height="200"        ></v-img>      </v-flex>      <v-flex xs12>        <h1 class="display-2 font-weight-bold mb-3">          Welcome to <strong>DErAileD</strong>        </h1>      </v-flex>      <v-flex xs12>        <v-form v-model="valid">          <v-container>            <v-layout>              <v-flex                xs12                md4              >                <v-text-field                  v-model="username"                  :rules="usernameRules"                  :counter="10"                  label="Username"                  required                ></v-text-field>              </v-flex>              <v-flex                xs12                md4              >                <v-text-field                  v-model="password"                  :rules="passwordRules"                  label="Password"                  required                ></v-text-field>              </v-flex>            </v-layout>          </v-container>        </v-form>      </v-flex>      <v-flex xs12>          <v-btn            @click="login"            :disabled="!valid"          >            Login          </v-btn>          <v-btn            @click="signUp"            :disabled="!valid"          >            Sign Up          </v-btn>      </v-flex>    </v-layout>  </v-container></template><script>  export default {    data: () => ({      password: '',      username: '',      valid: false,      usernameRules: [        v => !!v || '👀',        v => v.length > 4 || '🔥'      ],      passwordRules: [        v => !!v || '👾',        v => v.length > 7 || '👽'      ]    }),    methods: {      async signUp() {          try {              const { data } = await this.$axios.post('/users.json', {                  username: this.username,                  password: this.password,              });              console.log(data);          } catch (e) {}      },      async login() {          try {              const { data } = await this.$axios.get('/users.json');              console.log(data);          } catch (e) {}      }    }  }</script>

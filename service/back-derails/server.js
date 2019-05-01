@@ -1,5 +1,6 @@
 'use strict';
 
+require('dotenv').config();
 const { development } = require('./knexfile');
 const bookshelf = require('bookshelf')(require('knex')(development));
 const boom = require('boom');
@@ -14,13 +15,6 @@ const { User } = require('./models');
 
 const start = async () => {
 
-    const server = Hapi.server({
-        port: 8888,
-        host: 'localhost'
-    });
-
-    await server.register(require('hapi-auth-basic'));
-
     const validate = async (request, username, password, h) => {
         const user = await new User().where('username', username).fetch();
         if (!user) {
@@ -34,6 +28,14 @@ const start = async () => {
             credentials: {},
         };
     };
+
+    console.log(process.env.HOST);
+    const server = Hapi.server({
+        port: process.env.PORT,
+        host: process.env.HOST
+    });
+
+    await server.register(require('hapi-auth-basic'));
 
     server.auth.strategy('simple', 'basic', { validate });
 

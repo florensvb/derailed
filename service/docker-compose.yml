@@ -1,13 +1,21 @@
 version: '3'
 
 services:
-  derailed:
+  front-derails:
     build: front-derails
     hostname: derailed
-    container_name: derailed-service
+    container_name: front-derails
     restart: on-failure
     ports:
       - "8080:80"
+
+  back-derails:
+    build: back-derails
+    hostname: derailed
+    container_name: back-derails
+    restart: on-failure
+    ports:
+      - "3000:3000"
 
 volumes:
   derailed-data:
