@@ -29,7 +29,6 @@ const start = async () => {
         };
     };
 
-    console.log(process.env.HOST);
     const server = Hapi.server({
         port: process.env.PORT,
         host: process.env.HOST
