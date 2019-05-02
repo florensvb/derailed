@@ -2,12 +2,13 @@
   "name": "back-derails",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
-    "watch": "nodemon server.js",
     "db:migrate:latest": "knex migrate:latest",
     "db:migrate:make": "knex migrate:make",
-    "db:migrate:rollback": "knex migrate:rollback"
+    "db:migrate:rollback": "knex migrate:rollback",
+    "test": "lab -t 100",
+    "watch": "nodemon index.js"
   },
   "author": "",
   "license": "ISC",
@@ -24,6 +25,8 @@
     "mysql": "^2.17.1"
   },
   "devDependencies": {
+    "code": "^5.2.4",
+    "lab": "^18.0.2",
     "nodemon": "^1.18.11"
   }
 }

@@ -15,7 +15,12 @@ global.bookshelf = bookshelf;
 
 const { User } = require('./models');
 
-const start = async () => {
+const server = Hapi.server({
+    port: process.env.PORT,
+    host: process.env.HOST
+});
+
+const init = async () => {
 
     const createToken = (user, expiresIn = '1d') => {
         return jwt.sign(user.toJSON(), process.env.SECRET, {algorithm: 'HS256', expiresIn});
@@ -52,11 +57,6 @@ const start = async () => {
             isValid: true,
         };
     };
-
-    const server = Hapi.server({
-        port: process.env.PORT,
-        host: process.env.HOST
-    });
 
     await server.register(require('hapi-auth-jwt2'));
 
@@ -105,7 +105,9 @@ const start = async () => {
 
             const user = new User({ username: username, password: password });
 
-            return user.save();
+            await user.save();
+
+            return h.response().code(201);
         },
         options: {
             auth: false,
@@ -136,16 +138,22 @@ const start = async () => {
         }
     });
 
-    await server.start();
-    console.log(`Server running on ${server.info.uri}`);
+    return server;
 };
 
-process.on('unhandledRejection', (err) => {
+const start = () => init()
+    .then(async () => {
+        await server.start();
+        console.log(`Server running on ${server.info.uri}`);
+    })
+    .catch((e) => console.error(e));
 
+process.on('unhandledRejection', (err) => {
     console.log(err);
     process.exit(1);
 });
 
-start()
-    .then(() => {})
-    .catch((e) => console.error(e));
+module.exports =  {
+    start,
+    init,
+};
