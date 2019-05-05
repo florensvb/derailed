@@ -11,30 +11,8 @@ import VueRouter from 'vue-router'
 // Load environment vars
 dotenv.config();
 
-// Configure api
-const $axios = axios.create({
-  baseURL:  process.env.VUE_APP_API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-const token = window.localStorage.token;
-if (token) {
-  $axios.defaults.headers.common['Authorization'] = token;
-}
-
-Vue.prototype.$axios = $axios;
-
-Vue.prototype.user = () => {
-  const token = window.localStorage.token;
-  if (!token) return;
-  return jwt.decode(token);
-};
-
-
+// Configure the router
 Vue.use(VueRouter);
-
 const router = new VueRouter({
   routes: [
     {
@@ -46,6 +24,41 @@ const router = new VueRouter({
     },
   ],
 });
+
+// Configure api
+const $axios = axios.create({
+  baseURL:  process.env.VUE_APP_API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Add a response interceptor
+$axios.interceptors.response.use(response =>  {
+  // Do something with response data
+  return response;
+}, function (error) {
+  if (error && error.response && error.response.status === 401) {
+    router.push('/');
+  }
+  // Do something with response error
+  return Promise.reject(error);
+});
+
+// Set token if authenticated
+const token = window.localStorage.token;
+if (token) {
+  $axios.defaults.headers.common['Authorization'] = token;
+}
+
+Vue.prototype.$axios = $axios;
+
+// Func to get the user from jwt
+Vue.prototype.user = () => {
+  const token = window.localStorage.token;
+  if (!token) return;
+  return jwt.decode(token);
+};
 
 Vue.config.productionTip = false;
 

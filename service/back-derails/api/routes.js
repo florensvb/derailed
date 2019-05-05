@@ -26,6 +26,10 @@ module.exports = server => {
         };
     };
 
+    // Schemas
+    const username = joi.string().alphanum().min(3).max(30).required();
+    const password = joi.string().alphanum().min(7).max(30).required();
+
     // Sign in
     server.route({
         method: 'POST',
@@ -42,8 +46,8 @@ module.exports = server => {
             auth: false,
             validate: {
                 payload: joi.object().keys({
-                    username: joi.string().required(),
-                    password: joi.string().required(),
+                    username,
+                    password,
                 }),
             },
         },
@@ -76,8 +80,8 @@ module.exports = server => {
             auth: false,
             validate: {
                 payload: joi.object().keys({
-                    username: joi.string().required(),
-                    password: joi.string().required(),
+                    username,
+                    password,
                 }),
             },
         },

@@ -1,12 +1,18 @@
 <template>
   <v-app dark>
     <v-toolbar app>
-      <v-toolbar-title class="headline text-uppercase">
+      <v-toolbar-title class="headline text-uppercase row">
         <span>DErAileD</span>
         <span class="font-weight-light"> ENOWARS DESIGN</span>
       </v-toolbar-title>
+      <v-img
+        :src="require('./assets/logo.svg')"
+        height="50"
+        contain
+      ></v-img>
       <v-spacer></v-spacer>
       <v-toolbar-items class="hidden-sm-and-down">
+
         <v-btn @click="logout" flat>Logout</v-btn>
       </v-toolbar-items>
     </v-toolbar>
@@ -30,7 +36,7 @@ export default {
   },
   methods: {
     logout() {
-        delete window.localStorage.token;
+        window.localStorage.removeItem('token');
         this.$router.push('/');
     },
   }
