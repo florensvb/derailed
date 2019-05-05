@@ -1,6 +1,18 @@
 version: '3'
 
 services:
+  db:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    volumes:
+      - derailed_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: secretenowarrails
+      MYSQL_DATABASE: derailed
+      MYSQL_USER: derailed
+      MYSQL_PASSWORD: derailed
+
   front-derails:
     build: front-derails
     hostname: derailed
@@ -14,8 +26,17 @@ services:
     hostname: derailed
     container_name: back-derails
     restart: on-failure
+    environment:
+      DB_PASSWORD: secretenowarrails
+      DB_DATABASE: derailed
+      DB_USER: derailed
+      DB_HOST: 0.0.0.0
+    depends_on:
+      - db
+    links:
+      - db
     ports:
-      - "3000:3000"
+      - "8888:8888"
 
 volumes:
-  derailed-data:
+  derailed_data: {}

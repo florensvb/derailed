@@ -1,8 +1,7 @@
 module.exports = bookshelf.Model.extend({
-    tableName: 'users',
-    hasSecurePassword: true,
+    tableName: 'tickets',
     hasTimestamps: true,
     hidden: [
-        'password_digest',
+
     ],
 });

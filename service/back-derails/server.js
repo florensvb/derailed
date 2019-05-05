@@ -5,8 +5,7 @@ const { development } = require('./knexfile');
 const bookshelf = require('bookshelf')(require('knex')(development));
 const boom = require('boom');
 const Hapi = require('hapi');
-const joi = require('joi');
-const jwt = require('jsonwebtoken');
+const plugRoutes = require('./api/routes');
 
 const securePassword = require('bookshelf-secure-password');
 bookshelf.plugin(securePassword);
@@ -17,32 +16,13 @@ const { User } = require('./models');
 
 const server = Hapi.server({
     port: process.env.PORT,
-    host: process.env.HOST
+    host: process.env.HOST,
+    routes: {
+        cors: true,
+    }
 });
 
 const init = async () => {
-
-    const createToken = (user, expiresIn = '1d') => {
-        return jwt.sign(user.toJSON(), process.env.SECRET, {algorithm: 'HS256', expiresIn});
-    };
-
-    const authenticate = async (request, username, password, h) => {
-        const user = await User.forge().where('username', username).fetch();
-        if (!user) {
-            throw boom.notFound();
-        }
-
-        await user.authenticate(password);
-
-        if (!user) {
-            throw boom.unauthorized();
-        }
-
-        return {
-            token: createToken(user),
-            user: user,
-        };
-    };
 
     const validate = async (decoded, request, h) => {
         const user = await new User()
@@ -67,86 +47,22 @@ const init = async () => {
     });
     server.auth.default('jwt');
 
-    // Sign in
-    server.route({
-        method: 'POST',
-        path: '/auth',
-        handler: async (request, h) => {
-            const { payload: { username, password } } = request;
-            const { token, user } = await authenticate(request, username, password, h);
-            if (token) {
-                return h.response({ token, user }).header('authorization', token);
-            }
-            return boom.unauthorized();
-        },
-        options: {
-            auth: false,
-            validate: {
-                payload: joi.object().keys({
-                    username: joi.string().required(),
-                    password: joi.string().required(),
-                }),
-            },
-        },
+    server.events.on('response', request => {
+        if (!request) return;
+        console.log(`${request.method.toUpperCase()} ${request.url.pathname} --> ${request.response.statusCode}`);
     });
 
-    // Sign up
-    server.route({
-        method: 'POST',
-        path: '/auth/new',
-        handler: async (request, h) => {
-            const { payload: { username, password } } = request;
-
-            const existingUser = await User.forge().where('username', username).fetch();
-
-            if (existingUser) {
-                throw boom.badData();
-            }
-
-            const user = new User({ username: username, password: password });
-
-            await user.save();
-
-            return h.response().code(201);
-        },
-        options: {
-            auth: false,
-            validate: {
-                payload: joi.object().keys({
-                    username: joi.string().required(),
-                    password: joi.string().required(),
-                }),
-            },
-        },
-    });
-
-    server.route({
-        method: 'GET',
-        path:'/user',
-        options: {
-            auth: 'jwt'
-        },
-        handler: async (request, h) => {
-            const { auth: { credentials: { username } } }  = request;
-            const user = await User.forge().where('username', username).fetch();
-
-            if (!user) {
-                throw boom.badData();
-            }
-
-            return h.response(user.toJSON()).header("Authorization", request.headers.authorization);
-        }
-    });
+    plugRoutes(server);
 
     return server;
 };
 
 const start = () => init()
     .then(async () => {
-        await server.start();
+        await server.start(function (err) { console.log(err); });
         console.log(`Server running on ${server.info.uri}`);
     })
-    .catch((e) => console.error(e));
+    .catch((e) => console.log(e));
 
 process.on('unhandledRejection', (err) => {
     console.log(err);

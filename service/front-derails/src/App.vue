@@ -8,18 +8,16 @@
     </v-toolbar>
 
     <v-content>
-      <LandingPage/>
+      <router-view/>
     </v-content>
   </v-app>
 </template>
 
 <script>
-import LandingPage from './components/LandingPage'
 
 export default {
   name: 'App',
   components: {
-    LandingPage,
   },
   data () {
     return {
