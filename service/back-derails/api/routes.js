@@ -75,7 +75,7 @@ module.exports = server => {
 
                 return h.response(user.toJSON({ omitPivot: true })).code(201);
             } catch (e) {
-                console.log(e);
+                console.error(e);
                 return boom.internal();
             }
         },
@@ -151,9 +151,6 @@ module.exports = server => {
 
     const handleAddOrRemoveTicket = async (request, h) => {
         try {
-            console.log('zmrd');
-            const add = request.url.pathname === '/add-ticket';
-            console.log(add);
             const { username } = userFromRequest(request);
             const {payload: { ticket_id: ticketId }} = request;
             if (!username || !ticketId) return boom.badData();
