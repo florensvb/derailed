@@ -29,8 +29,9 @@ module.exports = server => {
     const userFromRequest = request => request.auth.credentials;
 
     // Schemas
-    const username = joi.string().alphanum().min(3).max(30).required();
+    const id = joi.number().integer().min(0).required();
     const password = joi.string().alphanum().min(7).max(30).required();
+    const username = joi.string().alphanum().min(3).max(30).required();
 
     // Sign in
     server.route({
@@ -148,37 +149,63 @@ module.exports = server => {
         }
     });
 
+    const handleAddOrRemoveTicket = async (request, h) => {
+        try {
+            console.log('zmrd');
+            const add = request.url.pathname === '/add-ticket';
+            console.log(add);
+            const { username } = userFromRequest(request);
+            const {payload: { ticket_id: ticketId }} = request;
+            if (!username || !ticketId) return boom.badData();
+
+            const ticket = await Ticket.forge({ id: ticketId }).fetch();
+            if (!ticket) return boom.badData();
+
+            const user = await User.forge({ username }).fetch({
+                withRelated: [
+                    'tickets',
+                ],
+            });
+
+            if (!user) return boom.badData();
+
+            const tickets = user.related('tickets');
+
+            if (add && tickets.models.find(t => t.id === ticketId)) return boom.badData();
+
+            add ? await tickets.attach(ticket.get('id')) : await tickets.detach(ticket.get('id'));
+
+            return add ? h.response().code(201) : h.response().code(204);
+        } catch (e) {
+            console.error(e);
+            throw boom.internal();
+        }
+    };
+
     server.route({
         method: 'POST',
         path: '/add-ticket',
         options: {
-            auth: 'jwt'
+            auth: 'jwt',
+            validate: {
+                payload: joi.object().keys({
+                    ticket_id: id,
+                }),
+            },
         },
-        handler: async (request, h) => {
-            try {
-                const { username } = userFromRequest(request);
-                const {payload: { ticket_id: ticketId }} = request;
-                if (!username || !ticketId) return boom.badData();
-
-                const ticket = await Ticket.forge({ id: ticketId }).fetch();
-                if (!ticket) return boom.badData();
-
-                const user = await User.forge({ username }).fetch({
-                    withRelated: [
-                        'tickets',
-                    ],
-                });
-                const tickets = user.related('tickets');
-
-                if (tickets.models.find(t => t.id === ticketId)) return boom.badData();
-
-                await tickets.attach(ticket.get('id'));
-
-                return h.response().code(201);
-            } catch (e) {
-                console.error(e);
-                throw boom.internal();
-            }
-        }
+        handler: handleAddOrRemoveTicket,
+    });
+    server.route({
+        method: 'POST',
+        path: '/remove-ticket',
+        options: {
+            auth: 'jwt',
+            validate: {
+                payload: joi.object().keys({
+                    ticket_id: id,
+                }),
+            },
+        },
+        handler: handleAddOrRemoveTicket,
     });
 };

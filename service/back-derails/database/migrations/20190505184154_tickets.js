@@ -12,7 +12,7 @@ exports.up = async function(knex) {
         });
 
     await knex('tickets').insert(
-        [...Array(1000).keys()]
+        [...Array(10).keys()]
             .map(number => {
                 return {
                     train: `train-${number}`,
