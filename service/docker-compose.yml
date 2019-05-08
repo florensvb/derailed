@@ -1,17 +1,21 @@
-version: '3'
+version: '2.1'
 
 services:
   db:
     image: mysql
     command: --default-authentication-plugin=mysql_native_password
     restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 1s
+      retries: 120
     volumes:
       - derailed_data:/var/lib/mysql
     environment:
-      MYSQL_ROOT_PASSWORD: secretenowarrails
+      MYSQL_ROOT_PASSWORD: secretenowarsrails
       MYSQL_DATABASE: derailed
       MYSQL_USER: derailed
-      MYSQL_PASSWORD: derailed
+      MYSQL_PASSWORD: secretenowarsctf
 
   front-derails:
     build: front-derails
@@ -20,19 +24,27 @@ services:
     restart: on-failure
     ports:
       - "8080:80"
+    environment:
+      VUE_APP_API_URL: http://localhost:8888
 
   back-derails:
     build: back-derails
     hostname: derailed
     container_name: back-derails
+    command: sh -c 'npm run db:migrate:latest && npm run watch'
+    working_dir: /usr/src/app
     restart: on-failure
     environment:
-      DB_PASSWORD: secretenowarrails
+      HOST: 0.0.0.0
+      PORT: 8888
+      SECRET: dontshareyoursecret
+      DB_PASSWORD: secretenowarsctf
       DB_DATABASE: derailed
       DB_USER: derailed
-      DB_HOST: 0.0.0.0
+      DB_HOST: db
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     links:
       - db
     ports:

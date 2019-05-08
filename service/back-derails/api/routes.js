@@ -38,12 +38,17 @@ module.exports = server => {
         method: 'POST',
         path: '/auth',
         handler: async (request, h) => {
-            const {payload: {username, password}} = request;
-            const {token, user} = await authenticate(request, username, password, h);
-            if (token) {
-                return h.response({token, user}).header('authorization', token);
+            try {
+                const {payload: {username, password}} = request;
+                const {token, user} = await authenticate(request, username, password, h);
+                if (token) {
+                    return h.response({token, user}).header('authorization', token);
+                }
+                return boom.unauthorized();
+            } catch (e) {
+                console.error(e);
+                return new boom(e);
             }
-            return boom.unauthorized();
         },
         options: {
             auth: false,
@@ -97,14 +102,19 @@ module.exports = server => {
             auth: 'jwt'
         },
         handler: async (request, h) => {
-            const {auth: {credentials: {username}}} = request;
-            const user = await User.forge().where('username', username).fetch();
+            try {
+                const {auth: {credentials: {username}}} = request;
+                const user = await User.forge().where('username', username).fetch();
 
-            if (!user) {
-                throw boom.badData();
+                if (!user) {
+                    throw boom.badData();
+                }
+
+                return h.response(user.toJSON({omitPivot: true})).header("Authorization", request.headers.authorization);
+            } catch (e) {
+                console.error(e);
+                return boom.internal();
             }
-
-            return h.response(user.toJSON({ omitPivot: true })).header("Authorization", request.headers.authorization);
         }
     });
 
@@ -120,7 +130,7 @@ module.exports = server => {
                 return h.response(tickets.toJSON({ omitPivot: true }));
             } catch (e) {
                 console.error(e);
-                throw boom.internal();
+                return boom.internal();
             }
         }
     });
@@ -167,6 +177,8 @@ module.exports = server => {
             if (!user) return boom.badData();
 
             const tickets = user.related('tickets');
+
+            const add = request.url.pathname === '/add-ticket';
 
             if (add && tickets.models.find(t => t.id === ticketId)) return boom.badData();
 
