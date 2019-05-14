@@ -7,8 +7,9 @@
       </v-toolbar-title>
       <v-img
         :src="require('./assets/logo.svg')"
-        height="50"
+        class="ml-4 mb-2"
         contain
+        height="50"
       ></v-img>
       <v-spacer></v-spacer>
       <v-toolbar-items class="hidden-sm-and-down">

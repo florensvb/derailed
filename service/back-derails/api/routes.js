@@ -4,8 +4,9 @@ module.exports = server => {
     const jwt = require('jsonwebtoken');
     const { User, Ticket, Train } = require('./../models');
 
-    const createToken = (user, expiresIn = '1d') => {
-        return jwt.sign(user.toJSON({ omitPivot: true }), process.env.SECRET, {algorithm: 'HS256', expiresIn});
+    const createToken = (user) => {
+        const secret = process.env.SECRET;
+        return jwt.sign({ id: user.get('id'), username: user.get('username') }, `${{ secret }}`, { algorithm: 'HS256' });
     };
 
     const authenticate = async (request, username, password, h) => {
@@ -14,7 +15,11 @@ module.exports = server => {
             throw boom.notFound();
         }
 
-        await user.authenticate(password);
+        try {
+            await user.authenticate(password);
+        } catch (e) {
+            throw boom.unauthorized();
+        }
 
         if (!user) {
             throw boom.unauthorized();
@@ -194,7 +199,7 @@ module.exports = server => {
                 }).fetch();
 
                 if (!ticket) return boom.badData('Cant find your ticket bra');
-                
+
                 await ticket.destroy();
             }
 

@@ -62,13 +62,14 @@
             <v-btn
               :loading="loading"
               @click="sellTicket(props.item)"
-              class="mr-2"
-              fab
+              color="red"
               flat
+              outline
               small
             >
-              <v-icon small>
-                delete
+              Get off train
+              <v-icon right small>
+                directions_walk
               </v-icon>
             </v-btn>
           </td>
@@ -98,6 +99,7 @@ export default {
                 return {
                     ...header,
                     align: 'left',
+                    sortable: false,
                 }
             })
         }
@@ -110,8 +112,8 @@ export default {
           randomTrain(name) {
             return `${_.sample(this.emojis)} ${name}`;
           },
-          alreadyOwns(ticket) {
-            return this.tickets.map(ut => ut.id).includes(ticket.id);
+          alreadyOwns(train) {
+            return this.tickets.map(t => t.train_id).includes(train.id);
           },
           async buyTicket(train) {
           this.loading = true;
