@@ -2,7 +2,7 @@ module.exports = server => {
     const boom = require('boom');
     const joi = require('joi');
     const jwt = require('jsonwebtoken');
-    const { User, Ticket } = require('./../models');
+    const { User, Ticket, Train } = require('./../models');
 
     const createToken = (user, expiresIn = '1d') => {
         return jwt.sign(user.toJSON({ omitPivot: true }), process.env.SECRET, {algorithm: 'HS256', expiresIn});
@@ -31,7 +31,7 @@ module.exports = server => {
     // Schemas
     const id = joi.number().integer().min(0).required();
     const password = joi.string().alphanum().min(7).max(30).required();
-    const username = joi.string().alphanum().min(3).max(30).required();
+    const username = joi.string().required();
 
     // Sign in
     server.route({
@@ -120,14 +120,14 @@ module.exports = server => {
 
     server.route({
         method: 'GET',
-        path: '/tickets',
+        path: '/trains',
         options: {
             auth: 'jwt'
         },
         handler: async (request, h) => {
             try {
-                const tickets = await Ticket.forge().fetchAll();
-                return h.response(tickets.toJSON({ omitPivot: true }));
+                const trains = await Train.forge().fetchAll();
+                return h.response(trains.toJSON({ omitPivot: true }));
             } catch (e) {
                 console.error(e);
                 return boom.internal();
@@ -147,7 +147,7 @@ module.exports = server => {
                 if (!username) return boom.badData();
                 const user = await User.forge({ username }).fetch({
                     withRelated: [
-                      'tickets',
+                      'tickets.train',
                     ],
                 });
                 const tickets = user.related('tickets');
@@ -162,11 +162,11 @@ module.exports = server => {
     const handleAddOrRemoveTicket = async (request, h) => {
         try {
             const { username } = userFromRequest(request);
-            const {payload: { ticket_id: ticketId }} = request;
-            if (!username || !ticketId) return boom.badData();
+            const { payload: { train_id: trainId }} = request;
+            if (!username || !trainId) return boom.badData('Cant find username or train_id');
 
-            const ticket = await Ticket.forge({ id: ticketId }).fetch();
-            if (!ticket) return boom.badData();
+            const train = await Train.forge({ id: trainId }).fetch();
+            if (!train) return boom.badData('Cant find the train that youre looking for');
 
             const user = await User.forge({ username }).fetch({
                 withRelated: [
@@ -174,15 +174,25 @@ module.exports = server => {
                 ],
             });
 
-            if (!user) return boom.badData();
+            if (!user) return boom.badData('No user');
 
             const tickets = user.related('tickets');
 
             const add = request.url.pathname === '/add-ticket';
 
-            if (add && tickets.models.find(t => t.id === ticketId)) return boom.badData();
+            if (add && tickets.models.find(t => t.get('train_id') === train.get('id'))) return boom.badData('Already own that ticket digga');
 
-            add ? await tickets.attach(ticket.get('id')) : await tickets.detach(ticket.get('id'));
+            if (add) {
+                await Ticket.forge({
+                    train_id: train.get('id'),
+                    user_id: user.get('id'),
+                }).save();
+            } else {
+                await Ticket.forge({
+                    train_id: train.get('id'),
+                    user_id: user.get('id'),
+                }).fetch().destroy();
+            }
 
             return add ? h.response().code(201) : h.response().code(204);
         } catch (e) {
@@ -198,7 +208,7 @@ module.exports = server => {
             auth: 'jwt',
             validate: {
                 payload: joi.object().keys({
-                    ticket_id: id,
+                    train_id: id,
                 }),
             },
         },
@@ -211,7 +221,7 @@ module.exports = server => {
             auth: 'jwt',
             validate: {
                 payload: joi.object().keys({
-                    ticket_id: id,
+                    train_id: id,
                 }),
             },
         },

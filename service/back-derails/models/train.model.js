@@ -1,11 +1,11 @@
 module.exports = bookshelf.Model.extend({
-    tableName: 'tickets',
+    tableName: 'trains',
     hasTimestamps: true,
     hidden: [
         'created_at',
         'updated_at',
     ],
-    train: function() {
-        return this.belongsTo(require('./train.model'));
+    user: function() {
+        return this.belongsTo(require('./user.model'));
     }
 });

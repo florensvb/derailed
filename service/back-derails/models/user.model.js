@@ -8,6 +8,6 @@ module.exports = bookshelf.Model.extend({
         'updated_at',
     ],
     tickets: function() {
-        return this.belongsToMany(require('./ticket.model'), 'user_tickets');
+        return this.hasMany(require('./ticket.model'), 'user_id');
     }
 });

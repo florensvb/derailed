@@ -50,7 +50,6 @@
                   v-model="password"
                 ></v-text-field>
               </v-flex>
-
             </v-layout>
           </v-container>
         </v-form>

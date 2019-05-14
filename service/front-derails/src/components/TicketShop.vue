@@ -1,8 +1,49 @@
 <template>
-  <v-layout justify-space-between column>
+  <v-container fluid grid-list-md>
+    <div class="px-2">
+      <v-timeline>
+        <v-timeline-item
+          v-for="train in trains"
+          :key="train.id"
+          color="red lighten-1"
+          small
+        >
+          <template v-slot:opposite>
+            <span>{{ require('moment')(train.departure).calendar() }}</span>
+          </template>
+          <v-card class="elevation-20">
+            <v-card-title class="headline">{{ train.name }}</v-card-title>
+            <v-card-text>
+              <div>{{ `Arrival: ${require('moment')(train.arrival).calendar()}` }}</div>
+              <div>{{ `From: ${train.from}`}}</div>
+              <div>{{ `To: ${train.to}`}}</div>
+              <div>{{ `Track: ${train.track}`}}</div>
+            </v-card-text>
+            <v-card-actions class="row justify-center">
+              <v-btn
+                :disabled="alreadyOwns(train)"
+                :loading="loading"
+                @click="buyTicket(train)"
+                outline
+                flat
+                small
+              >
+                Get on train
+                <v-icon right small>
+                  shopping_cart
+                </v-icon>
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-timeline-item>
+      </v-timeline>
+    </div>
+
+    <v-divider/>
+
     <div>
       <v-toolbar flat color="#424242">
-        <v-toolbar-title>Tickets that can get me out of here</v-toolbar-title>
+        <v-toolbar-title>Tickets I already own</v-toolbar-title>
       </v-toolbar>
       <v-data-table
         :headers="headers"
@@ -12,43 +53,11 @@
         hide-actions
       >
         <template v-slot:items="props">
-          <td>{{ `${randomTrain()} ${props.item.train}` }}</td>
-          <td>{{ `🕓 ${require('moment')(props.item.departure).calendar()}` }}</td>
-          <td>{{ props.item.train_type }}</td>
-          <td>
-            <v-btn
-              :disabled="alreadyOwns(props.item)"
-              :loading="loading"
-              @click="buyTicket(props.item)"
-              class="mr-2"
-              fab
-              flat
-              small
-            >
-              <v-icon small>
-                shopping_cart
-              </v-icon>
-            </v-btn>
-          </td>
-        </template>
-      </v-data-table>
-    </div>
-
-    <div>
-      <v-toolbar flat color="#424242">
-        <v-toolbar-title>Tickets I already own</v-toolbar-title>
-      </v-toolbar>
-      <v-data-table
-        :headers="headers"
-        :items="userTickets"
-        :loading="loading"
-        class="elevation-1"
-        hide-actions
-      >
-        <template v-slot:items="props">
-          <td>{{ `${randomTrain()} ${props.item.train}` }}</td>
-          <td>{{ `🕓 ${require('moment')(props.item.departure).calendar()}` }}</td>
-          <td>{{ props.item.train_type }}</td>
+          <td>{{ randomTrain(props.item.train.name) }}</td>
+          <td>{{ props.item.train.from }}</td>
+          <td>{{ props.item.train.to }}</td>
+          <td>{{ require('moment')(props.item.train.departure).calendar() }}</td>
+          <td>{{ require('moment')(props.item.train.arrival).calendar() }}</td>
           <td>
             <v-btn
               :loading="loading"
@@ -66,7 +75,7 @@
         </template>
       </v-data-table>
     </div>
-  </v-layout>
+  </v-container>
 </template>
 
 <script>
@@ -75,15 +84,16 @@ import _ from 'lodash'
 export default {
     data () {
         return {
+            trains: [],
             tickets: [],
-            userTickets: [],
-            trains: ['🚞', '🚟', '🚂', '🚃', '🚄', '🚅', '🚆', '🚈', '🚉', '🚊', '🚋', '💺', '🚝', '🛤'],
+            emojis: ['🚞', '🚟', '🚂', '🚃', '🚄', '🚅', '🚆', '🚈', '🚉', '🚊', '🚋', '💺', '🚝', '🛤'], //replace with images?
             loading: true,
             headers: [
-                { text: 'Train', value: 'train' },
+                { text: 'Train', value: 'name' },
+                { text: 'From', value: 'from' },
+                { text: 'To', value: 'to' },
                 { text: 'Departure', value: 'departure' },
-                { text: 'Type', value: 'train_type' },
-                { text: 'Actions', value: 'name', sortable: false }
+                { text: 'Arrival', value: 'arrival' },
             ].map(header => {
                 return {
                     ...header,
@@ -97,17 +107,17 @@ export default {
         this.getUserTickets();
     },
     methods: {
-          randomTrain() {
-            return _.sample(this.trains);
+          randomTrain(name) {
+            return `${_.sample(this.emojis)} ${name}`;
           },
           alreadyOwns(ticket) {
-            return this.userTickets.map(ut => ut.id).includes(ticket.id);
+            return this.tickets.map(ut => ut.id).includes(ticket.id);
           },
-          async buyTicket(ticket) {
+          async buyTicket(train) {
           this.loading = true;
           try {
             await this.$axios.post('/add-ticket', {
-              ticket_id: ticket.id,
+              train_id: train.id,
             });
 
             await this.getUserTickets();
@@ -116,11 +126,11 @@ export default {
           }
           this.loading = false;
         },
-      async sellTicket(ticket) {
+      async sellTicket(train) {
           this.loading = true;
           try {
             await this.$axios.post('/remove-ticket', {
-              ticket_id: ticket.id,
+              train_id: train.id,
             });
 
             await this.getUserTickets();
@@ -132,8 +142,8 @@ export default {
         async getTickets() {
             this.loading = true;
             try {
-                const { data: tickets } = await this.$axios.get('/tickets');
-                this.tickets = tickets;
+                const { data: trains } = await this.$axios.get('/trains');
+                this.trains = trains;
             } catch (e) {
                 // Snackbar?
             }
@@ -143,7 +153,7 @@ export default {
             this.loading = true;
             try {
                 const { data: userTickets } = await this.$axios.get('/my-tickets');
-                this.userTickets = userTickets;
+                this.tickets = userTickets;
             } catch (e) {
                 // Snackbar?
             }

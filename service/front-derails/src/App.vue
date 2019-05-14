@@ -12,7 +12,6 @@
       ></v-img>
       <v-spacer></v-spacer>
       <v-toolbar-items class="hidden-sm-and-down">
-
         <v-btn @click="logout" flat>Logout</v-btn>
       </v-toolbar-items>
     </v-toolbar>

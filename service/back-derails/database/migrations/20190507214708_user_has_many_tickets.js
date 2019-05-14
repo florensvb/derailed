@@ -1,27 +1,29 @@
 
-exports.up = function(knex, Promise) {
+exports.up = function(knex) {
   return knex.schema
-    .createTable('user_tickets', table => {
+    .createTable('tickets', table => {
       table.increments();
 
       table.integer('user_id').unsigned().notNullable();
-      table.integer('ticket_id').unsigned().notNullable();
+      table.integer('train_id').unsigned().notNullable();
 
       table.foreign('user_id').references('users.id');
-      table.foreign('ticket_id').references('tickets.id');
+      table.foreign('train_id').references('trains.id');
 
-      table.unique(['user_id', 'ticket_id']);
+      table.string('ticket_id');
+
+      table.unique(['user_id', 'train_id']);
 
       table.timestamps();
     })
 };
 
-exports.down = function(knex, Promise) {
+exports.down = function(knex) {
   return knex.schema
-    .table('user_tickets', table => {
+    .table('tickets', table => {
       table.dropForeign('user_id');
-      table.dropForeign('ticket_id');
-      table.dropUnique(['user_id', 'ticket_id']);
+      table.dropForeign('train_id');
+      table.dropUnique(['user_id', 'train_id']);
     })
-    .dropTable('user_tickets');
+    .dropTable('tickets');
 };

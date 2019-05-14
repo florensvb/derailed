@@ -1,0 +1,178 @@
+{
+  "emojis": [{
+    "train_display": "RE4356",
+    "leaves": "2019-05-09T10:42:00",
+    "slugslug": "RE4356",
+    "arrives": "2019-05-09T10:40:00",
+    "arrives_delay": 18,
+    "station_from": {
+      "name": "Elsterwerda"
+    },
+    "station_to": {
+      "name": "Waren(M\u00fcritz)"
+    },
+    "track": "6",
+    "leaves_delay": 18
+  }, {
+    "arrives": "2019-05-09T10:41:00",
+    "leaves": null,
+    "delay_reason": null,
+    "track": "8",
+    "arrives_delay": null,
+    "leaves_delay": null,
+    "slug": "ec178",
+    "slugslug": "ec178-praha-hl-n-0632-berlin-hbf-tief-1041-80",
+    "train_display": "EC178",
+    "station_from": {
+      "name": "Praha hl.n.",
+      "station_id": 5400014,
+      "slug": "praha-hl-n"
+    },
+    "station_to": {
+      "name": "Berlin Hbf (tief)",
+      "station_id": 8098160,
+      "slug": "berlin-hbf-tief"
+    }
+  }, {
+    "arrives": "2019-05-09T10:41:00",
+    "leaves": null,
+    "delay_reason": "Warten auf Fahrg\u00e4ste aus einem anderen Zug",
+    "track": "14",
+    "arrives_delay": null,
+    "leaves_delay": null,
+    "slug": "re3170",
+    "slugslug": "re3170-frankfurt-oder-0935-brandenburg-hbf-1137-80",
+    "train_display": "RE3170",
+    "station_from": {
+      "name": "Frankfurt(Oder)",
+      "station_id": 8010113,
+      "slug": "frankfurt-oder"
+    },
+    "station_to": {
+      "name": "Brandenburg Hbf",
+      "station_id": 8010060,
+      "slug": "brandenburg-hbf"
+    }
+  }, {
+    "arrives": "2019-05-09T10:44:00",
+    "leaves": "2019-05-09T10:46:00",
+    "delay_reason": null,
+    "track": "11",
+    "arrives_delay": null,
+    "leaves_delay": null,
+    "slug": "re3714",
+    "slugslug": "re3714-dessau-hbf-0905-wunsdorf-waldstadt-1155-80",
+    "train_display": "RE3714",
+    "station_from": {
+      "name": "Dessau Hbf",
+      "station_id": 8010077,
+      "slug": "dessau-hbf"
+    },
+    "station_to": {
+      "name": "W\u00fcnsdorf-Waldstadt",
+      "station_id": 8013350,
+      "slug": "wunsdorf-waldstadt"
+    }
+  }, {
+    "arrives": "2019-05-09T10:45:00",
+    "leaves": null,
+    "delay_reason": null,
+    "track": "4",
+    "arrives_delay": null,
+    "leaves_delay": null,
+    "slug": "rb18511",
+    "slugslug": "rb18511-nauen-1008-berlin-hbf-tief-1045-80",
+    "train_display": "RB18511",
+    "station_from": {
+      "name": "Nauen",
+      "station_id": 8010239,
+      "slug": "nauen"
+    },
+    "station_to": {
+      "name": "Berlin Hbf (tief)",
+      "station_id": 8098160,
+      "slug": "berlin-hbf-tief"
+    },
+    "info": "Nauen - Berlin Hbf (tief): Information. Mehrere Wagen fehlen."
+  }, {
+    "arrives": "2019-05-09T10:49:00",
+    "leaves": "2019-05-09T10:51:00",
+    "delay_reason": null,
+    "track": "12",
+    "arrives_delay": null,
+    "leaves_delay": null,
+    "slug": "re3111",
+    "slugslug": "re3111-magdeburg-buckau-0903-frankfurt-oder-1204-80",
+    "train_display": "RE3111",
+    "station_from": {
+      "name": "Magdeburg-Buckau",
+      "station_id": 8013456,
+      "slug": "magdeburg-buckau"
+    },
+    "station_to": {
+      "name": "Frankfurt(Oder)",
+      "station_id": 8010113,
+      "slug": "frankfurt-oder"
+    }
+  }, {
+    "arrives": "2019-05-09T10:53:00",
+    "leaves": "2019-05-09T10:58:00",
+    "delay_reason": null,
+    "track": "6",
+    "arrives_delay": null,
+    "leaves_delay": null,
+    "slug": "re62163",
+    "slugslug": "re62163-ludwigsfelde-1023-rathenow-1157-80",
+    "train_display": "RE62163",
+    "station_from": {
+      "name": "Ludwigsfelde",
+      "station_id": 8010215,
+      "slug": "ludwigsfelde"
+    },
+    "station_to": {
+      "name": "Rathenow",
+      "station_id": 8010296,
+      "slug": "rathenow"
+    }
+  }, {
+    "arrives": "2019-05-09T10:55:00",
+    "leaves": null,
+    "delay_reason": null,
+    "track": "7",
+    "arrives_delay": null,
+    "leaves_delay": null,
+    "slug": "ice1533",
+    "slugslug": "ice1533-darmstadt-hbf-0637-berlin-gesundbrunnen-1105-80",
+    "train_display": "ICE1533",
+    "station_from": {
+      "name": "Darmstadt Hbf",
+      "station_id": 8000068,
+      "slug": "darmstadt-hbf"
+    },
+    "station_to": {
+      "name": "Berlin Gesundbrunnen",
+      "station_id": 8011102,
+      "slug": "berlin-gesundbrunnen"
+    }
+  }, {
+    "arrives": "2019-05-09T10:55:00",
+    "leaves": "2019-05-09T10:59:00",
+    "delay_reason": null,
+    "track": "1",
+    "arrives_delay": 2,
+    "leaves_delay": 2,
+    "slug": "ec379",
+    "slugslug": "ec379-kiel-hbf-0742-praha-hl-n-1526-80",
+    "train_display": "EC379",
+    "station_from": {
+      "name": "Kiel Hbf",
+      "station_id": 8000199,
+      "slug": "kiel-hbf"
+    },
+    "station_to": {
+      "name": "Praha hl.n.",
+      "station_id": 5400014,
+      "slug": "praha-hl-n"
+    }
+  }]
+}
