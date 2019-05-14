@@ -1,6 +1,6 @@
 <template>
   <v-container fluid grid-list-md>
-    <div class="px-2">
+    <div>
       <v-timeline>
         <v-timeline-item
           v-for="train in trains"
@@ -41,7 +41,7 @@
 
     <v-divider/>
 
-    <div>
+    <div class="elevation-20">
       <v-toolbar flat color="#424242">
         <v-toolbar-title>Tickets I already own</v-toolbar-title>
       </v-toolbar>
