@@ -1,35 +1,7 @@
 module.exports = server => {
     const boom = require('boom');
     const joi = require('joi');
-    const jwt = require('jsonwebtoken');
     const { User, Ticket, Train } = require('./../models');
-
-    const createToken = (user) => {
-        const secret = process.env.SECRET;
-        return jwt.sign({ id: user.get('id'), username: user.get('username') }, `${{ secret }}`, { algorithm: 'HS256' });
-    };
-
-    const authenticate = async (request, username, password, h) => {
-        const user = await User.forge().where('username', username).fetch();
-        if (!user) {
-            throw boom.notFound();
-        }
-
-        try {
-            await user.authenticate(password);
-        } catch (e) {
-            throw boom.unauthorized();
-        }
-
-        if (!user) {
-            throw boom.unauthorized();
-        }
-
-        return {
-            token: createToken(user),
-            user: user,
-        };
-    };
 
     const userFromRequest = request => request.auth.credentials;
 
@@ -37,34 +9,6 @@ module.exports = server => {
     const id = joi.number().integer().min(0).required();
     const password = joi.string().alphanum().min(7).max(30).required();
     const username = joi.string().required();
-
-    // Sign in
-    server.route({
-        method: 'POST',
-        path: '/auth',
-        handler: async (request, h) => {
-            try {
-                const {payload: {username, password}} = request;
-                const {token, user} = await authenticate(request, username, password, h);
-                if (token) {
-                    return h.response({token, user}).header('authorization', token);
-                }
-                return boom.unauthorized();
-            } catch (e) {
-                console.error(e);
-                return new boom(e);
-            }
-        },
-        options: {
-            auth: false,
-            validate: {
-                payload: joi.object().keys({
-                    username,
-                    password,
-                }),
-            },
-        },
-    });
 
     // Sign up
     server.route({
@@ -209,6 +153,63 @@ module.exports = server => {
             throw boom.internal();
         }
     };
+
+
+    const createToken = (user) => {
+        const secret = process.env.SECRET;
+        return jwt.sign({ id: user.get('id'), username: user.get('username') }, `${{ secret }}`, { algorithm: 'HS256' });
+    };
+
+    const authenticate = async (request, username, password, h) => {
+        const user = await User.forge().where('username', username).fetch();
+        if (!user) {
+            throw boom.notFound();
+        }
+
+        try {
+            await user.authenticate(password);
+        } catch (e) {
+            throw boom.unauthorized();
+        }
+
+        if (!user) {
+            throw boom.unauthorized();
+        }
+
+        return {
+            token: createToken(user),
+            user: user,
+        };
+    };
+
+    const jwt = require('jsonwebtoken');
+    // Sign in
+    server.route({
+        method: 'POST',
+        path: '/auth',
+        handler: async (request, h) => {
+            try {
+                const {payload: {username, password}} = request;
+                const {token, user} = await authenticate(request, username, password, h);
+                if (token) {
+                    return h.response({token, user}).header('authorization', token);
+                }
+                return boom.unauthorized();
+            } catch (e) {
+                console.error(e);
+                return new boom(e);
+            }
+        },
+        options: {
+            auth: false,
+            validate: {
+                payload: joi.object().keys({
+                    username,
+                    password,
+                }),
+            },
+        },
+    });
 
     server.route({
         method: 'POST',
