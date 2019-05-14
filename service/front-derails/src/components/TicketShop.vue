@@ -30,7 +30,7 @@
               >
                 Get on train
                 <v-icon right small>
-                  shopping_cart
+                  train
                 </v-icon>
               </v-btn>
             </v-card-actions>
@@ -126,11 +126,11 @@ export default {
           }
           this.loading = false;
         },
-      async sellTicket(train) {
+      async sellTicket(ticket) {
           this.loading = true;
           try {
             await this.$axios.post('/remove-ticket', {
-              train_id: train.id,
+              train_id: ticket.train.id,
             });
 
             await this.getUserTickets();

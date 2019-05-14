@@ -188,10 +188,14 @@ module.exports = server => {
                     user_id: user.get('id'),
                 }).save();
             } else {
-                await Ticket.forge({
+                const ticket = await Ticket.forge({
                     train_id: train.get('id'),
                     user_id: user.get('id'),
-                }).fetch().destroy();
+                }).fetch();
+
+                if (!ticket) return boom.badData('Cant find your ticket bra');
+                
+                await ticket.destroy();
             }
 
             return add ? h.response().code(201) : h.response().code(204);
