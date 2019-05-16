@@ -54,7 +54,7 @@ if (token) {
 Vue.prototype.$axios = $axios;
 
 // Func to get the user from jwt
-Vue.prototype.user = () => {
+Vue.prototype.$user = () => {
   const token = window.localStorage.token;
   if (!token) return;
   return jwt.decode(token);

@@ -61,6 +61,15 @@
           <td>
             <v-btn
               :loading="loading"
+              @click="viewTicket(props.item)"
+              flat
+              outline
+              small
+            >
+              Info
+            </v-btn>
+            <v-btn
+              :loading="loading"
               @click="sellTicket(props.item)"
               color="red"
               flat
@@ -76,6 +85,48 @@
         </template>
       </v-data-table>
     </div>
+
+    <v-dialog
+      v-model="dialog"
+      width="500"
+    >
+      <v-card>
+        <v-card-title
+          primary-title
+          class="headline grey"
+        >
+          {{ selectedTicket ? selectedTicket.train.name : '' }}
+        </v-card-title>
+
+        <v-card-text>
+          From: {{ selectedTicket ? selectedTicket.train.from : '' }}
+        </v-card-text>
+
+        <v-card-text>
+          To: {{ selectedTicket ? selectedTicket.train.to : '' }}
+        </v-card-text>
+
+        <v-card-text>
+          Arrival: {{ selectedTicket ? require('moment')(selectedTicket.train.arrival).calendar() : '' }}
+        </v-card-text>
+
+        <v-card-text>
+          Departure: {{ selectedTicket ? require('moment')(selectedTicket.train.departure).calendar() : '' }}
+        </v-card-text>
+
+        <v-card-text>
+          Track: {{ selectedTicket ? selectedTicket.train.track : '' }}
+        </v-card-text>
+
+        <v-card-text v-if="$user()">
+          Owner: {{ $user() ? $user().username : '' }}
+        </v-card-text>
+
+        <v-card-text v-if="$user() && selectedTicket && selectedTicket.ticket_id">
+          Ticket-ID: {{ selectedTicket.ticket_id }}
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -85,10 +136,12 @@ import _ from 'lodash'
 export default {
     data () {
         return {
-            trains: [],
-            tickets: [],
+            dialog: false,
+            selectedTicket: null,
             emojis: ['🚞', '🚟', '🚂', '🚃', '🚄', '🚅', '🚆', '🚈', '🚉', '🚊', '🚋', '💺', '🚝', '🛤'], //replace with images?
             loading: true,
+            tickets: [],
+            trains: [],
             headers: [
                 { text: 'Train', value: 'name' },
                 { text: 'From', value: 'from' },
@@ -128,18 +181,22 @@ export default {
           }
           this.loading = false;
         },
-      async sellTicket(ticket) {
-          this.loading = true;
-          try {
-            await this.$axios.post('/remove-ticket', {
-              train_id: ticket.train.id,
-            });
+        viewTicket(ticket) {
+          this.selectedTicket = ticket;
+          this.dialog = true;
+        },
+        async sellTicket(ticket) {
+            this.loading = true;
+            try {
+              await this.$axios.post('/remove-ticket', {
+                train_id: ticket.train.id,
+              });
 
-            await this.getUserTickets();
-          } catch (e) {
-            // Snackbar?
-          }
-          this.loading = false;
+              await this.getUserTickets();
+            } catch (e) {
+              // Snackbar?
+            }
+            this.loading = false;
         },
         async getTickets() {
             this.loading = true;
@@ -151,7 +208,7 @@ export default {
             }
             this.loading = false;
         },
-      async getUserTickets () {
+        async getUserTickets () {
             this.loading = true;
             try {
                 const { data: userTickets } = await this.$axios.get('/my-tickets');
