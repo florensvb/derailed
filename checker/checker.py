@@ -1,55 +1,69 @@
-import requests
+import os
+import socket
+import hmac
+import hashlib
+import random
+import jwt
+from requests_jwt import JWTAuth
 from enochecker import BaseChecker, BrokenServiceException, run
 
 
 class DerailedChecker(BaseChecker):
 
-    def __init__(self):
-        super().__init__()
-        self.host = self._ip
-        self.port = '8080'
+    port = 8080
 
-    def put_flag(self):
-        # TODO: put flag in the service
+    def __init__(self):
+        super().__init__(round=random.randint(0, 50))
+        self.address = socket.gethostbyname(socket.gethostname())
+        self.host = 'http://'+self.address+':'
+
+        self.name = 'checker'
+        self.pwd = 'secretPassword'
+        self.registered = False
+
+    def putflag(self):
+        # check connectivity
         try:
-            self.connect()
-            flag = self.generate_flag()
-            requests.post('http://localhost:8080', data=flag)
+            self.init_connection()
+            self.http_post("/putflaghere", params={"flag": self.flag})
+            self.debug("flag is {}".format(self.flag))
 
         except BrokenServiceException:
             return BrokenServiceException
         finally:
             self.close()
 
-        # move to sub-put_flag method
-        self.debug("flag is {}".format(self.flag))
-        self.http_post("/putflaghere", params={"flag": self.flag})
-
-    def get_flag(self):
-        # TODO: get the flag
+    def getflag(self):
         if not self.http_get("/getflag") == self.flag:
             raise BrokenServiceException("Oops, wrong flag")
 
-    def put_noise(self):
-        # TODO: put some noise
+    def putnoise(self):
         with self.connect() as telnet:
             telnet.write(self.noise)
 
-    def get_noise(self):
-        # TODO: get some noise
+    def getnoise(self):
         with self.connect() as telnet:
             telnet.write("gimmeflag\n")
             telnet.read_expect(self.noise)
 
-    def connect(self):
-        """
-        auth = JWTAuth('secretToken')
-        requests.get("http://jwt-protected.com", auth=auth)
-        """
-        super().connect()
-
     def havoc(self):
         pass
+
+    '''
+    ####################
+    #  HELPER METHODS  #
+    ####################
+    '''
+
+    def init_connection(self):
+        try:
+            s = self.connect(self.address, self.port, 30)
+            self.debug("Connected to {}".format(self.address))
+        except ConnectionRefusedError:
+            return "Service unreachable"
+        except ConnectionError:
+            return "Connection failed :("
+        return s
 
     def close(self):
         pass
@@ -64,5 +78,20 @@ class DerailedChecker(BaseChecker):
             flagContent = roundId (4bytes) + entropy (8bytes)
             flagSignature = hmac(flagContent)
         """
-    pass
+        flag_content = bytes([self.round]) + os.urandom(8)  # round_id + entropy
+
+        rand_key = str(random.randint(0, 99)).encode()
+        flag_signature = hmac.new(rand_key, flag_content, hashlib.sha256).hexdigest()
+
+        flag = "ENO" + flag_content.hex() + flag_signature
+        self.flag = flag
+        return flag
+
+
+if __name__ == "__main__":
+    # run(DerailedChecker)
+    checker = DerailedChecker()
+    checker.generate_flag()
+    sock = checker.init_connection()
+
 
