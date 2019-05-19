@@ -1,0 +1,3 @@
+git+https://github.com/domenukk/enochecker
+pip3 install jwt
+pip3 install requests_jwt
