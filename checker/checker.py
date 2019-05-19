@@ -3,6 +3,7 @@ import socket
 import hmac
 import hashlib
 import random
+import requests
 import jwt
 from requests_jwt import JWTAuth
 from enochecker import BaseChecker, BrokenServiceException, run
@@ -19,6 +20,7 @@ class DerailedChecker(BaseChecker):
 
         self.name = 'checker'
         self.pwd = 'secretPassword'
+        self.back_port = '8888'
         self.registered = False
 
     def putflag(self):
@@ -69,7 +71,15 @@ class DerailedChecker(BaseChecker):
         pass
 
     def register(self):
-        pass
+        data = {'username': 'hyfdfasfd',
+                'password': self.pwd}
+        try:
+            response = requests.post(self.host + self.back_port + "/auth/new", data=data)
+            if response.ok:
+                jwt_token = response.headers    # ['Authentication']
+        except ConnectionError:
+            return 'Connection failed :('
+        self.registered = True
 
     def generate_flag(self):
         """
@@ -93,5 +103,6 @@ if __name__ == "__main__":
     checker = DerailedChecker()
     checker.generate_flag()
     sock = checker.init_connection()
+    checker.register()
 
 
