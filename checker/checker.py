@@ -3,30 +3,29 @@ import socket
 import hmac
 import hashlib
 import random
+import string
 import requests
-import jwt
-from requests_jwt import JWTAuth
 from enochecker import BaseChecker, BrokenServiceException, run
 
 
 class DerailedChecker(BaseChecker):
-
     port = 8080
 
     def __init__(self):
         super().__init__(round=random.randint(0, 50))
         self.address = socket.gethostbyname(socket.gethostname())
-        self.host = 'http://'+self.address+':'
+        self.host = 'http://' + self.address + ':'
 
         self.name = 'checker'
         self.pwd = 'secretPassword'
         self.back_port = '8888'
+        self.jwt_token = ''
         self.registered = False
 
     def putflag(self):
         # check connectivity
         try:
-            self.init_connection()
+            self.test_connection()
             self.http_post("/putflaghere", params={"flag": self.flag})
             self.debug("flag is {}".format(self.flag))
 
@@ -57,28 +56,40 @@ class DerailedChecker(BaseChecker):
     ####################
     '''
 
-    def init_connection(self):
+    def test_connection(self):
         try:
-            s = self.connect(self.address, self.port, 30)
+            s = self.connect(self.address, self.port, 2)
             self.debug("Connected to {}".format(self.address))
-        except ConnectionRefusedError:
-            return "Service unreachable"
-        except ConnectionError:
-            return "Connection failed :("
+        except requests.exceptions.ConnectionError:
+            return 'Service Offline'
         return s
 
     def close(self):
         pass
 
     def register(self):
-        data = {'username': 'hyfdfasfd',
+        data = {'username': random_username(),
                 'password': self.pwd}
+
+        ''' options_headers = {'User-Agent': self.http_useragent_randomize(),
+                           "Access-Control-Request-Headers": 'authorization,content-type',
+                           "Access-Control-Request-Method": 'POST',
+                           "Origin": self.host + str(self.port),
+                           "Referer": self.host + str(self.port) + '/'
+                           } '''
+
+        post_headers = {'User-Agent': self.http_useragent_randomize()}
+
         try:
-            response = requests.post(self.host + self.back_port + "/auth/new", data=data)
-            if response.ok:
-                jwt_token = response.headers    # ['Authentication']
-        except ConnectionError:
-            return 'Connection failed :('
+            # o = requests.options(self.host + self.back_port + "/auth/new", headers=options_headers)
+            p = requests.post(self.host + self.back_port + "/auth/new", data=data, headers=post_headers)
+            r = requests.post(self.host + self.back_port + "/auth", data=data, headers=post_headers)
+
+            if r.ok:
+                jwt_token = r.headers['authorization']
+                self.jwt_token = jwt_token
+        except requests.exceptions.ConnectionError:
+            return 'Service Offline'
         self.registered = True
 
     def generate_flag(self):
@@ -98,11 +109,13 @@ class DerailedChecker(BaseChecker):
         return flag
 
 
+def random_username():
+    return ''.join(random.choice(string.ascii_lowercase) for i in range(20))
+
+
 if __name__ == "__main__":
     # run(DerailedChecker)
     checker = DerailedChecker()
     checker.generate_flag()
-    sock = checker.init_connection()
+    sock = checker.test_connection()
     checker.register()
-
-
