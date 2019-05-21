@@ -30,7 +30,7 @@ const init = async () => {
             .where('username', decoded.username)
             .fetch();
         if (!user) {
-            throw boom.notFound();
+            throw boom.unauthorized();
         }
 
         return {
