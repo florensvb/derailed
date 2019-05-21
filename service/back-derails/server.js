@@ -49,7 +49,7 @@ const init = async () => {
     server.auth.default('jwt');
 
     server.events.on('response', request => {
-        if (!request) return;
+        if (!request || !request.response) return;
         console.log(`${request.method.toUpperCase()} ${request.url.pathname} --> ${request.response.statusCode}`);
     });
 

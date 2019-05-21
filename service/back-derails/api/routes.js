@@ -7,6 +7,7 @@ module.exports = server => {
 
     // Schemas
     const id = joi.number().integer().min(0).required();
+    const unrequiredString = joi.string();
     const password = joi.string().alphanum().min(7).max(30).required();
     const username = joi.string().required();
 
@@ -111,7 +112,7 @@ module.exports = server => {
     const handleAddOrRemoveTicket = async (request, h) => {
         try {
             const { username } = userFromRequest(request);
-            const { payload: { train_id: trainId }} = request;
+            const { payload: { train_id: trainId, ticket_id: ticketId }} = request;
             if (!username || !trainId) return boom.badData('Cant find username or train_id');
 
             const train = await Train.forge({ id: trainId }).fetch();
@@ -132,10 +133,14 @@ module.exports = server => {
             if (add && tickets.models.find(t => t.get('train_id') === train.get('id'))) return boom.badData('Already own that ticket digga');
 
             if (add) {
-                await Ticket.forge({
+                const ticket = await Ticket.forge({
                     train_id: train.get('id'),
                     user_id: user.get('id'),
-                }).save();
+                });
+                if (ticketId) {
+                    ticket.set('ticket_id', ticketId);
+                }
+                await ticket.save();
             } else {
                 const ticket = await Ticket.forge({
                     train_id: train.get('id'),
@@ -219,6 +224,7 @@ module.exports = server => {
             validate: {
                 payload: joi.object().keys({
                     train_id: id,
+                    ticket_id: unrequiredString,
                 }),
             },
         },
