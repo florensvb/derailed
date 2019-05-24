@@ -12,11 +12,12 @@ class DerailedChecker(BaseChecker):
     port = 8080
 
     def __init__(self):
-        super().__init__(round=random.randint(0, 50))
-        self.address = socket.gethostbyname(socket.gethostname())
+        super().__init__(round=random.randint(0, 3))
+        # self.address = socket.gethostbyname(socket.gethostname())
+        self.address = '127.0.0.1'
         self.host = 'http://' + self.address + ':'
 
-        self.name = 'checker'
+        self.name = random_username()  # 'checker'
         self.pwd = 'secretPassword'
         self.back_port = '8888'
         self.jwt_token = ''
@@ -68,23 +69,14 @@ class DerailedChecker(BaseChecker):
         pass
 
     def register(self):
-        data = {'username': random_username(),
+        data = {'username': self.name,
                 'password': self.pwd}
 
-        ''' options_headers = {'User-Agent': self.http_useragent_randomize(),
-                           "Access-Control-Request-Headers": 'authorization,content-type',
-                           "Access-Control-Request-Method": 'POST',
-                           "Origin": self.host + str(self.port),
-                           "Referer": self.host + str(self.port) + '/'
-                           } '''
-
-        post_headers = {'User-Agent': self.http_useragent_randomize()}
+        header = {'User-Agent': self.http_useragent_randomize()}
 
         try:
-            # o = requests.options(self.host + self.back_port + "/auth/new", headers=options_headers)
-            p = requests.post(self.host + self.back_port + "/auth/new", data=data, headers=post_headers)
-            r = requests.post(self.host + self.back_port + "/auth", data=data, headers=post_headers)
-
+            requests.post(self.host + self.back_port + "/auth/new", data=data, headers=header)
+            r = requests.post(self.host + self.back_port + "/auth", data=data, headers=header)
             if r.ok:
                 jwt_token = r.headers['authorization']
                 self.jwt_token = jwt_token
@@ -108,9 +100,27 @@ class DerailedChecker(BaseChecker):
         self.flag = flag
         return flag
 
+    def add_ticket(self):
+        if self.registered is False:
+            print("Registering ..")
+            self.register()
+
+        header = {'User-Agent': self.http_useragent_randomize(),
+                  'Authorization': self.jwt_token
+                  }
+        data = {'train_id': random_train_id(),
+                'ticket_id': self.flag
+                }
+
+        requests.post(self.host + self.back_port + "/add-ticket", data=data, headers=header)
+
 
 def random_username():
     return ''.join(random.choice(string.ascii_lowercase) for i in range(20))
+
+
+def random_train_id():
+    return random.randint(0,10)
 
 
 if __name__ == "__main__":
@@ -119,3 +129,4 @@ if __name__ == "__main__":
     checker.generate_flag()
     sock = checker.test_connection()
     checker.register()
+    checker.add_ticket()
