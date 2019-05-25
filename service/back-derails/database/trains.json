@@ -155,7 +155,7 @@
       "slug": "berlin-gesundbrunnen"
     }
   }, {
-    "arrives": "2019-05-1708:55:00",
+    "arrives": "2019-05-17T08:55:00",
     "leaves": "2019-05-17T08:59:00",
     "delay_reason": null,
     "track": "1",
