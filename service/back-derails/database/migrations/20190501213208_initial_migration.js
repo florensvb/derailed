@@ -6,6 +6,9 @@ exports.up = function(knex) {
 
          table.string('username');
          table.string('password_digest');
+         table.string('user_role').defaultTo('user');
+         table.string('avatar');
+         table.string('phone_number');
 
          table.unique(['username']);
 

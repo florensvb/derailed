@@ -4,6 +4,9 @@ module.exports = bookshelf.Model.extend({
     hasTimestamps: true,
     hidden: [
         'password_digest',
+        'user_role',
+        'avatar',
+        'phone_number',
         'created_at',
         'updated_at',
     ],
