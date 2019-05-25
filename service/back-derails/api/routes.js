@@ -243,4 +243,21 @@ module.exports = server => {
         },
         handler: handleAddOrRemoveTicket,
     });
+
+    server.route({
+        method: 'GET',
+        path: '/user-profile',
+        options: {
+            auth: 'jwt',
+        },
+        handler: async (request, h) => {
+            try {
+                const userInfo = await User.forge().where('id', 1).fetch();
+                return h.response(userInfo.toJSON())
+            } catch (e) {
+                console.error(e);
+                return boom.methodNotAllowed();
+            }
+        }
+    });
 };

@@ -5,6 +5,7 @@ import dotenv from 'dotenv'
 import jwt from 'jsonwebtoken'
 import LandingPage from './components/LandingPage'
 import TicketShop from './components/TicketShop'
+import UserProfile from './components/UserProfile'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
@@ -21,6 +22,9 @@ const router = new VueRouter({
     }, {
       path: '/ticket-shop',
       component: TicketShop
+    }, {
+      path: '/user-profile',
+      component: UserProfile
     },
   ],
 });

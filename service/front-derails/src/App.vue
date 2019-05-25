@@ -11,10 +11,6 @@
         contain
         height="50"
       ></v-img>
-      <v-spacer></v-spacer>
-      <v-toolbar-items class="hidden-sm-and-down">
-        <v-btn @click="logout" flat>Logout</v-btn>
-      </v-toolbar-items>
     </v-toolbar>
 
     <v-content>
@@ -34,11 +30,5 @@ export default {
       //
     }
   },
-  methods: {
-    logout() {
-        window.localStorage.removeItem('token');
-        this.$router.push('/');
-    },
-  }
 }
 </script>
