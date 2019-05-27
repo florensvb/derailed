@@ -1,11 +1,32 @@
 import os
-import socket
 import hmac
+import socket
 import hashlib
 import random
 import string
 import requests
+import pyexiv2
+import piexif
+import base64
+
 from enochecker import BaseChecker, BrokenServiceException, run
+
+image = '1.jpg'
+
+
+def read_metadata():
+    pic = pyexiv2.ImageMetadata('test.jpg')
+    pic.read()
+    for key, value in pic.items():
+        if value.type == 'Ascii':
+            print(key, value.raw_value)
+
+
+def b64_to_img(encoded):
+    img_data = base64.b64decode(encoded)
+    with open("test.jpg", "wb") as f:
+        f.write(img_data)
+        f.close()
 
 
 class DerailedChecker(BaseChecker):
@@ -13,8 +34,7 @@ class DerailedChecker(BaseChecker):
 
     def __init__(self):
         super().__init__(round=random.randint(0, 3))
-        # self.address = socket.gethostbyname(socket.gethostname())
-        self.address = '127.0.0.1'
+        self.address = socket.gethostbyname(socket.gethostname())
         self.host = 'http://' + self.address + ':'
 
         self.name = random_username()  # 'checker'
@@ -22,6 +42,7 @@ class DerailedChecker(BaseChecker):
         self.back_port = '8888'
         self.jwt_token = ''
         self.registered = False
+        self.avatar64 = ''
 
     def putflag(self):
         # check connectivity
@@ -114,19 +135,39 @@ class DerailedChecker(BaseChecker):
 
         requests.post(self.host + self.back_port + "/add-ticket", data=data, headers=header)
 
+    def input_flag_metadata(self):
+        pic = pyexiv2.ImageMetadata(image)
+        pic.read()
+        for key, value in pic.items():
+            if value.type == 'Ascii':
+                pic[key] = self.generate_flag()
+                pic.write()
+                break
+
+    def img_to_b64(self):
+        with open(image, "rb") as pic:
+            self.avatar64 = base64.b64encode(pic.read())
+            pic.close()
+
+    # maybe input flag with piexif, pyexiv2 lib too big :(
+
 
 def random_username():
     return ''.join(random.choice(string.ascii_lowercase) for i in range(20))
 
 
 def random_train_id():
-    return random.randint(0,10)
+    return random.randint(0, 10)
 
 
 if __name__ == "__main__":
     # run(DerailedChecker)
     checker = DerailedChecker()
-    checker.generate_flag()
-    sock = checker.test_connection()
-    checker.register()
-    checker.add_ticket()
+    # checker.generate_flag()
+    # checker.test_connection()
+    # checker.register()
+    # checker.add_ticket()
+    checker.input_flag_metadata()
+    checker.img_to_b64()
+    b64_to_img(checker.avatar64)
+    read_metadata()
