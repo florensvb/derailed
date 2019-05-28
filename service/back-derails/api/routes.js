@@ -159,7 +159,6 @@ module.exports = server => {
         }
     };
 
-
     const createToken = (user) => {
         const secret = process.env.SECRET;
         return jwt.sign({ id: user.get('id'), username: user.get('username') }, `${{ secret }}`, { algorithm: 'HS256' });
@@ -252,11 +251,14 @@ module.exports = server => {
         },
         handler: async (request, h) => {
             try {
-                const userInfo = await User.forge().where('id', 1).fetch();
-                return h.response(userInfo.toJSON())
+                const { username } = userFromRequest(request);
+                if (!username) return boom.badData();
+                const user = await User.forge().where('username', username).fetch();
+                if (!user) return boom.notFound();
+                return h.response(user.toJSON())
             } catch (e) {
                 console.error(e);
-                return boom.methodNotAllowed();
+                return boom.internal();
             }
         }
     });

@@ -232,7 +232,6 @@ export default {
         },
         async userProfile() {
             try {
-                /*const { data: user} = await*/ this.$axios.get('user-profile');
                 setTimeout(() => {
                   this.$router.push('/user-profile')
                 })
