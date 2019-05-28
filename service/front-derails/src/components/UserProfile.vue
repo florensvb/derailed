@@ -1,62 +1,64 @@
 <template>
-  <v-container>
+  <v-container grid-list-md text-xs-center>
+    <v-layout row wrap align-center>
+      <v-flex xs6>
+        <v-flex xs12>
+          <v-avatar size="126">
+            <img src="../../../../checker/1.jpg">
+          </v-avatar>
+        </v-flex>
+        <v-flex xs12>
+          <v-btn @click="changeAvatar">
+            Change Avatar
+          </v-btn>
+        </v-flex>
+      </v-flex>
 
-    <v-btn
-      @click="back"
-    >
-      Back
-    </v-btn>
+      <v-flex xs6>
+        <v-card>
+          <v-card-title>
 
-    <v-flex class="mb-4">
-      <v-avatar size="126" class="mr-4">
-       <img src="../../../../checker/1.jpg">
-      </v-avatar>
-      <v-btn
-        @click="changeAvatar"
-      >
-        Change Avatar
+            <v-card-text>
+              Username: {{userInfo.username}}
+            </v-card-text>
+
+            <v-card-text v-if="userInfo && userInfo.user_role">
+              Role: {{userInfo.user_role}}
+            </v-card-text>
+
+            <v-card-text v-if="userInfo && userInfo.phone_number">
+              Phone: {{userInfo.phone_number}}
+            </v-card-text>
+
+            <v-card-text v-if="userInfo && userInfo.updated_at">
+              Updated: {{require('moment')(userInfo.updated_at).calendar()}}
+            </v-card-text>
+
+          </v-card-title>
+        </v-card>
+      </v-flex>
+    </v-layout>
+
+    <br/>
+
+    <v-flex xs12>
+      <v-btn @click="back">
+        Back
+      </v-btn>
+      <v-btn>
+        Update Profile Info
       </v-btn>
     </v-flex>
 
-    <v-card>
-      <v-card-title
-        primary-title class="headline black">
-
-        <v-card-text>
-          Username: {{userInfo.username}}
-        </v-card-text>
-
-        <v-card-text>
-          Role: {{userInfo.user_role}}
-        </v-card-text>
-
-        <v-card-text>
-          Phone: {{userInfo.phone_number}}
-        </v-card-text>
-
-        <v-card-text>
-          Updated At: {{userInfo.updated_at}}
-        </v-card-text>
-
-      </v-card-title>
-    </v-card>
-
-    <v-btn
-      class="btn btn-sm btn-secondary action-btn"
-    >
-      Update Profile Info
-    </v-btn>
-
   </v-container>
 </template>
-
-
 
 <script>
   export default{
     data() {
       return {
         userInfo: {},
+        loading: false,
       }
     },
     mounted () {

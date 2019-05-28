@@ -121,8 +121,9 @@ export default {
             });
             this.snackbar(`Congrats, ${user.username}! You might get a ticket out of here, but it won't be easy!`);
         } catch (e) {
-            this.snackbar(`Looks like you aren't gonna get on that train ✋ Hurry, you must get a ticket before it is too late!`, 'error');
-            console.error(e);
+            const status = e.response.status;
+            if (status === 422) this.snackbar(`Maybe somebody claimed to be YOU?!`, 'error');
+            else this.snackbar(`Looks like you aren't gonna get on that train ✋ Hurry, you must get a ticket before it is too late!`, 'error');
         }
     },
     async login() {
@@ -135,8 +136,12 @@ export default {
             this.snackbar(`Entering the ticket shop ... chew chew 🚂`);
             setTimeout(() => {
                 this.$router.push('/ticket-shop');
-            }, 3000);
-        } catch (e) {}
+            }, 2000);
+        } catch (e) {
+          const status = e.response.status;
+          if (status === 401) this.snackbar(`Did you forget the one thing you were not supposed to forget?!`, 'error');
+          else this.snackbar(`I don't know .. something went wrong.`, 'error');
+        }
     },
     setApiAuthorizationHeader(token) {
         window.localStorage.token = token;

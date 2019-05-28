@@ -1,13 +1,5 @@
 <template>
   <v-container fluid grid-list-md>
-
-    <v-toolbar bar >
-      <v-toolbar-items class="hidden-sm-and-down">
-        <v-btn @click="userProfile" flat>User Profile</v-btn>
-        <v-btn @click="logout" flat>Logout</v-btn>
-      </v-toolbar-items>
-    </v-toolbar>
-
     <div>
       <v-timeline>
         <v-timeline-item
@@ -170,10 +162,6 @@ export default {
         this.getUserTickets();
     },
     methods: {
-          logout() {
-            window.localStorage.removeItem('token');
-            this.$router.push('/');
-          },
           randomTrain(name) {
             return `${_.sample(this.emojis)} ${name}`;
           },
@@ -230,15 +218,6 @@ export default {
             }
             this.loading = false;
         },
-        async userProfile() {
-            try {
-                setTimeout(() => {
-                  this.$router.push('/user-profile')
-                })
-            } catch (e) {
-              // error
-            }
-        }
     }
 }
 </script>

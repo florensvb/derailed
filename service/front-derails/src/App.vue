@@ -4,6 +4,7 @@
       <v-toolbar-title class="headline text-uppercase row">
         <span>DErAileD</span>
         <span class="font-weight-light"> ENOWARS DESIGN</span>
+        <v-spacer/>
       </v-toolbar-title>
       <v-img
         :src="require('./assets/logo.svg')"
@@ -11,6 +12,11 @@
         contain
         height="50"
       ></v-img>
+      <v-spacer></v-spacer>
+      <v-toolbar-items class="hidden-sm-and-down">
+        <v-btn v-if="$user()" @click="goToUserProfile" flat>User</v-btn>
+        <v-btn @click="logout" flat>Logout</v-btn>
+      </v-toolbar-items>
     </v-toolbar>
 
     <v-content>
@@ -28,6 +34,15 @@ export default {
   data () {
     return {
       //
+    }
+  },
+  methods: {
+    logout() {
+      window.localStorage.removeItem('token');
+      this.$router.push('/');
+    },
+    goToUserProfile() {
+      this.$router.push('/user-profile');
     }
   },
 }
