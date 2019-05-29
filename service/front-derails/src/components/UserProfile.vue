@@ -4,13 +4,12 @@
       <v-flex xs6>
         <v-flex xs12>
           <v-avatar size="126">
-            <img src="../../../../checker/1.jpg">
+            <img v-if="user && user.avatar" v-bind:src="avatarPath"/>
+            <img v-else src="@/assets/potato.jpg"/>
           </v-avatar>
         </v-flex>
         <v-flex xs12>
-          <v-btn @click="changeAvatar">
-            Change Avatar
-          </v-btn>
+          <input type="file" accept="image/*" @change="changeAvatar">
         </v-flex>
       </v-flex>
 
@@ -19,19 +18,19 @@
           <v-card-title>
 
             <v-card-text>
-              Username: {{userInfo.username}}
+              Username: {{user.username}}
             </v-card-text>
 
-            <v-card-text v-if="userInfo && userInfo.user_role">
-              Role: {{userInfo.user_role}}
+            <v-card-text v-if="user && user.user_role">
+              Role: {{user.user_role}}
             </v-card-text>
 
-            <v-card-text v-if="userInfo && userInfo.phone_number">
-              Phone: {{userInfo.phone_number}}
+            <v-card-text v-if="user && user.phone_number">
+              Phone: {{user.phone_number}}
             </v-card-text>
 
-            <v-card-text v-if="userInfo && userInfo.updated_at">
-              Updated: {{require('moment')(userInfo.updated_at).calendar()}}
+            <v-card-text v-if="user && user.updated_at">
+              Updated: {{require('moment')(user.updated_at).calendar()}}
             </v-card-text>
 
           </v-card-title>
@@ -57,26 +56,36 @@
   export default{
     data() {
       return {
-        userInfo: {},
+        user: {},
         loading: false,
       }
     },
     mounted () {
-      this.getUserInfo();
+      this.getUser();
+    },
+    computed: {
+      avatarPath() {
+        if (!this.user || !this.user.avatar) return;
+        return `${process.env.VUE_APP_API_URL}/user-avatar/${this.user.avatar}?token=${localStorage.token}`;
+      },
     },
     methods: {
-          async getUserInfo () {
+          async getUser () {
             this.loading = true;
             try {
               const { data: user } = await this.$axios.get('/user-profile');
-              this.userInfo = user;
+              this.user = user;
             } catch (e) {
               // err
             }
             this.loading = false;
           },
-          changeAvatar(){
-             // upload image/string
+          async changeAvatar(e){
+              const file = e.target.files[0];
+              const formData = new FormData();
+              formData.append('avatar', file);
+              const { data: user } = await this.$axios.post('/user-avatar', formData, { headers: { 'Content-Type': 'multipart/form-data' }});
+              this.user = user;
           },
           back(){
             this.$router.push('/ticket-shop')

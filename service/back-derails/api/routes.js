@@ -1,9 +1,14 @@
 module.exports = server => {
     const boom = require('boom');
+    const fs = require('fs');
+    const md5 = require('md5');
     const joi = require('joi');
     const { User, Ticket, Train } = require('./../models');
 
-    const userFromRequest = request => request.auth.credentials;
+    const userFromRequest = request => {
+        if (!request.auth.credentials || !request.auth.credentials.username) throw boom.unauthorized();
+        return request.auth.credentials;
+    };
 
     // Schemas
     const id = joi.number().integer().min(0).required();
@@ -94,7 +99,6 @@ module.exports = server => {
         handler: async (request, h) => {
             try {
                 const { username } = userFromRequest(request);
-                if (!username) return boom.badData();
                 const user = await User.forge({ username }).fetch({
                     withRelated: [
                       'tickets.train',
@@ -252,13 +256,77 @@ module.exports = server => {
         handler: async (request, h) => {
             try {
                 const { username } = userFromRequest(request);
-                if (!username) return boom.badData();
                 const user = await User.forge().where('username', username).fetch();
                 if (!user) return boom.notFound();
                 return h.response(user.toJSON())
             } catch (e) {
                 console.error(e);
                 return boom.internal();
+            }
+        }
+    });
+
+    server.route({
+        method: 'GET',
+        path: '/user-avatar/{id}',
+        options: {
+            auth: 'jwt',
+        },
+        handler: async (request, h) => {
+            try {
+                const { username } = userFromRequest(request);
+                const user = await User.forge({ username }).fetch();
+                const fileName = user.get('avatar');
+                const file = fs.readFileSync(`${__dirname}/../uploads/${fileName}`);
+                return h.response(file);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    });
+
+    server.route({
+        method: 'POST',
+        path: '/user-avatar',
+        options: {
+            auth: 'jwt',
+            payload: {
+                allow: 'multipart/form-data',
+                output: 'stream',
+                parse: true,
+            },
+        },
+        handler: async (request, h) => {
+            try {
+                const data = request.payload;
+                const avatar = data['avatar']; // accept a field call avatar
+
+                if (!avatar) {
+                    return boom.badData('No avatar in the form data');
+                }
+
+                const { username } = userFromRequest(request);
+                const user = await User.forge({ username }).fetch();
+                if (!user) return boom.badData();
+
+                const fileName = avatar.hapi.filename;
+                const mimeType = fileName.split('.').pop();
+
+                const digest = md5(avatar._data);
+                const folder = `${__dirname}/../uploads`;
+                const path = `${folder}/${digest}.${mimeType}`;
+                const newFileName = `${digest}.${mimeType}`;
+
+                if (!fs.existsSync(folder)) {
+                    fs.mkdirSync(folder);
+                }
+
+                fs.writeFileSync(path, avatar._data);
+                await user.set('avatar', newFileName).save();
+                return h.response(user.toJSON());
+            } catch (err) {
+                // error handling
+                return boom.badRequest(err.message, err);
             }
         }
     });

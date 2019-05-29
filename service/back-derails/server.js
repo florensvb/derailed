@@ -19,6 +19,9 @@ const server = Hapi.server({
     host: process.env.HOST,
     routes: {
         cors: true,
+        files: {
+            relativeTo: require('path').join(__dirname, '../uploads'),
+        }
     }
 });
 
@@ -39,6 +42,7 @@ const init = async () => {
     };
 
     await server.register(require('hapi-auth-jwt2'));
+    await server.register(require('@hapi/inert'));
 
     const secret = process.env.SECRET;
     server.auth.strategy('jwt', 'jwt', {
