@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid grid-list-md>
+  <v-container fluid grid-list-md text-xs-center>
     <div>
       <v-timeline>
         <v-timeline-item
@@ -13,13 +13,13 @@
           </template>
           <v-card class="elevation-20">
             <v-card-title class="headline">{{ train.name }}</v-card-title>
-            <v-card-text>
+            <v-card-text style="font-size:1.2em">
               <div>{{ `Arrival: ${require('moment')(train.arrival).calendar()}` }}</div>
               <div>{{ `From: ${train.from}`}}</div>
               <div>{{ `To: ${train.to}`}}</div>
               <div>{{ `Track: ${train.track}`}}</div>
             </v-card-text>
-            <v-card-actions class="row justify-center">
+            <v-card-actions class="row justify-end">
               <v-btn
                 :disabled="alreadyOwns(train)"
                 :loading="loading"
