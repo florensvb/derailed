@@ -6,18 +6,31 @@
         <span class="font-weight-light"> ENOWARS DESIGN</span>
         <v-spacer/>
       </v-toolbar-title>
-      <v-img
-        :src="require('./assets/logo.svg')"
-        class="ml-4 mb-2"
-        contain
-        height="50"
-      ></v-img>
+      <v-btn flat @click="conductor=true">
+        <v-img
+          :src="require('./assets/logo.svg')"
+          class="ml-4 mb-2"
+          contain
+          height="50"
+        ></v-img>
+      </v-btn>
       <v-spacer></v-spacer>
       <v-toolbar-items class="hidden-sm-and-down">
         <v-btn v-if="$user()" @click="goToUserProfile" flat>User</v-btn>
         <v-btn @click="logout" flat>Logout</v-btn>
       </v-toolbar-items>
     </v-toolbar>
+
+    <v-dialog
+      v-model="conductor"
+      width="500"
+    >
+      <v-card>
+        <v-card-title primary-title>
+          I am your conductor and I am 12 years old.
+        </v-card-title>
+      </v-card>
+    </v-dialog>
 
     <v-content>
       <router-view/>
@@ -33,7 +46,7 @@ export default {
   },
   data () {
     return {
-      //
+      conductor: false,
     }
   },
   methods: {
