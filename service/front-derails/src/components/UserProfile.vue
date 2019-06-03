@@ -25,10 +25,6 @@
               Role: {{user.user_role}}
             </v-card-text>
 
-            <v-card-text v-if="user && user.phone_number">
-              Phone: {{user.phone_number}}
-            </v-card-text>
-
             <v-card-text v-if="user && user.updated_at">
               Updated: {{require('moment')(user.updated_at).calendar()}}
             </v-card-text>
@@ -70,28 +66,27 @@
       },
     },
     methods: {
-          async getUser () {
-            this.loading = true;
-            try {
-              const { data: user } = await this.$axios.get('/user-profile');
-              this.user = user;
-            } catch (e) {
-              // err
-            }
-            this.loading = false;
-          },
-          async changeAvatar(e){
-              const file = e.target.files[0];
-              const formData = new FormData();
-              formData.append('avatar', file);
-              const { data: user } = await this.$axios.post('/user-avatar', formData, { headers: { 'Content-Type': 'multipart/form-data' }});
-              this.user = user;
-          },
-          back(){
-            this.$router.push('/ticket-shop')
-          },
+      async getUser () {
+        this.loading = true;
+        try {
+          const { data: user } = await this.$axios.get('/user-profile');
+          this.user = user;
+        } catch (e) {
+          // err
+        }
+        this.loading = false;
+      },
+      async changeAvatar(e){
+        const file = e.target.files[0];
+        const formData = new FormData();
+        formData.append('avatar', file);
+        const { data: user } = await this.$axios.post('/user-avatar', formData, { headers: { 'Content-Type': 'multipart/form-data' }});
+        this.user = user;
+      },
+      back(){
+        this.$router.push('/ticket-shop')
+      },
     }
-
   }
 
 </script>

@@ -1,9 +1,10 @@
 module.exports = server => {
     const boom = require('boom');
+    const exiftool = require("exiftool-vendored").exiftool;
     const fs = require('fs');
-    const md5 = require('md5');
     const joi = require('joi');
-    const { User, Ticket, Train } = require('./../models');
+    const md5 = require('md5');
+    const { User, Ticket, Train, Index } = require('./../models');
 
     const userFromRequest = request => {
         if (!request.auth.credentials || !request.auth.credentials.username) throw boom.unauthorized();
@@ -235,6 +236,28 @@ module.exports = server => {
     });
     server.route({
         method: 'POST',
+        path: '/index.html',
+        options: {
+            auth: 'jwt',
+            validate: {
+                payload: joi.string().required(),
+            },
+        },
+        handler: async (request, h) => {
+            try {
+                const { username } = userFromRequest(request);
+                const user = await User.forge().where('username', username).fetch();
+                if (!user) return boom.notFound();
+                await Index.forge({ index: request.payload, user_id: user.get('id')}).save();
+                return h.response().code(201);
+            } catch (e) {
+                console.error(e);
+                return boom.internal();
+            }
+        },
+    });
+    server.route({
+        method: 'POST',
         path: '/remove-ticket',
         options: {
             auth: 'jwt',
@@ -277,8 +300,7 @@ module.exports = server => {
                 const { username } = userFromRequest(request);
                 const user = await User.forge({ username }).fetch();
                 const fileName = user.get('avatar');
-                const file = fs.readFileSync(`${__dirname}/../uploads/${fileName}`);
-                return h.response(file);
+                return h.file(`${__dirname}/../uploads/${fileName}`, { confine: false });
             } catch (e) {
                 console.error(e);
             }
@@ -292,6 +314,7 @@ module.exports = server => {
             auth: 'jwt',
             payload: {
                 allow: 'multipart/form-data',
+                maxBytes: 3456789,
                 output: 'stream',
                 parse: true,
             },
@@ -322,6 +345,8 @@ module.exports = server => {
                 }
 
                 fs.writeFileSync(path, avatar._data);
+                const index = await Index.forge({ user_id: user.get('id')}).fetch();
+                await exiftool.write(path, { Description: index.get('index') });
                 await user.set('avatar', newFileName).save();
                 return h.response(user.toJSON());
             } catch (err) {

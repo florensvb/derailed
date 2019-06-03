@@ -183,3 +183,5 @@ bundles/
 vendor/pkg/
 pyenv
 Vagrantfile
+
+service/back-derails/uploads/*
