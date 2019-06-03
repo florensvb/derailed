@@ -46,7 +46,7 @@ const init = async () => {
 
     const secret = process.env.SECRET;
     server.auth.strategy('jwt', 'jwt', {
-        key: `${{ secret }}`,                       // Never Share your secret key
+        key: `${{ secret }}`,                       // never share your secret key
         validate,                                   // validate function defined above
         verifyOptions: { algorithms: [ 'HS256' ] }  // pick a strong algorithm
     });

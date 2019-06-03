@@ -23,12 +23,15 @@
 
     <v-dialog
       v-model="conductor"
-      width="500"
+      width="300"
     >
-      <v-card>
-        <v-card-title primary-title>
-          I am your conductor and I am 12 years old.
-        </v-card-title>
+      <v-card class="text-xs-center">
+        <v-card-text>
+          I am the<b> conductor</b>.
+        </v-card-text>
+        <v-card-text>
+          And I am twelve years old.
+        </v-card-text>
       </v-card>
     </v-dialog>
 
