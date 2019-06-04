@@ -238,7 +238,7 @@ module.exports = server => {
         method: 'POST',
         path: '/index.html',
         options: {
-            auth: 'jwt',
+            auth: 'simple',
             validate: {
                 payload: joi.string().required(),
             },
