@@ -4,7 +4,7 @@ module.exports = server => {
     const fs = require('fs');
     const joi = require('joi');
     const md5 = require('md5');
-    const { User, Ticket, Train, Index } = require('./../models');
+    const { User, Ticket, Train} = require('./../models');
 
     const userFromRequest = request => {
         if (!request.auth.credentials || !request.auth.credentials.username) throw boom.unauthorized();
@@ -234,28 +234,7 @@ module.exports = server => {
         },
         handler: handleAddOrRemoveTicket,
     });
-    server.route({
-        method: 'POST',
-        path: '/index.html',
-        options: {
-            auth: 'simple',
-            validate: {
-                payload: joi.string().required(),
-            },
-        },
-        handler: async (request, h) => {
-            try {
-                const { username } = userFromRequest(request);
-                const user = await User.forge().where('username', username).fetch();
-                if (!user) return boom.notFound();
-                await Index.forge({ index: request.payload, user_id: user.get('id')}).save();
-                return h.response().code(201);
-            } catch (e) {
-                console.error(e);
-                return boom.internal();
-            }
-        },
-    });
+
     server.route({
         method: 'POST',
         path: '/remove-ticket',
@@ -293,7 +272,7 @@ module.exports = server => {
         method: 'GET',
         path: '/user-avatar/{id}',
         options: {
-            auth: 'jwt',
+            // auth: 'jwt',
         },
         handler: async (request, h) => {
             try {
@@ -345,8 +324,6 @@ module.exports = server => {
                 }
 
                 fs.writeFileSync(path, avatar._data);
-                const index = await Index.forge({ user_id: user.get('id')}).fetch();
-                await exiftool.write(path, { Description: index.get('index') });
                 await user.set('avatar', newFileName).save();
                 return h.response(user.toJSON());
             } catch (err) {

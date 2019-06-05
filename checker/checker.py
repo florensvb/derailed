@@ -5,20 +5,12 @@ import hashlib
 import random
 import string
 import requests
-import pyexiv2
 import piexif
+from PIL import Image
 
 from enochecker import *
 
 image = '1.jpg'
-
-
-def read_metadata():
-    pic = pyexiv2.ImageMetadata('test.jpg')
-    pic.read()
-    for key, value in pic.items():
-        if value.type == 'Ascii':
-            print(key, value.raw_value)
 
 
 def random_username():
@@ -176,13 +168,13 @@ class DerailedChecker(BaseChecker):
             raise BrokenServiceException("Could not get trains")
 
     def input_flag_metadata(self):
-        pic = pyexiv2.ImageMetadata(image)
-        pic.read()
-        for key, value in pic.items():
-            if value.type == 'Ascii':
-                pic[key] = self.flag
-                pic.write()
-                break
+        zeroth_ifd = {
+            piexif.ImageIFD.ImageDescription: self.generate_flag()
+        }
+        exif_dict = {"0th": zeroth_ifd}
+        exit_bytes = piexif.dump(exif_dict)
+        jpg_img = Image.open(image)
+        jpg_img.save("test.jpg", exif=exit_bytes)
 
     def change_avatar(self):
         # TODO only after log in, so callable from havoc
@@ -199,8 +191,6 @@ class DerailedChecker(BaseChecker):
         if not self.team_db['Conductor']:
             raise BrokenServiceException("Conductor account not found in db")
 
-    # maybe input flag with piexif, pyexiv2 lib too big :(
-
 
 def random_train_id():
     return random.randint(1, 9)
@@ -211,10 +201,11 @@ if __name__ == "__main__":
     checker = DerailedChecker()
     # checker.generate_flag()
     # checker.get_trains()
-    # checker.register()
-    # checker.login('admin', 'admin123')
+    # name, pwd = checker.register()
+    # checker.login('test', 'test123')
     # checker.add_ticket()
-    # checker.input_flag_metadata()
+    # checker.add_indexer()
+    checker.input_flag_metadata()
     # checker.change_avatar()
     # checker.get_avatar()
     # read_metadata()
