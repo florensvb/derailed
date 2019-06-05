@@ -19,9 +19,9 @@ const server = Hapi.server({
     host: process.env.HOST,
     routes: {
         cors: true,
-        files: {
-            relativeTo: require('path').join(__dirname, '../uploads'),
-        }
+        // files: {
+        //     relativeTo: require('path').join(__dirname, '../uploads'),
+        // }
     }
 });
 

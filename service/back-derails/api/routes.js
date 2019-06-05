@@ -358,13 +358,14 @@ module.exports = server => {
 
     server.route({
         method: 'GET',
-        path: '/tmp/{file*}',
+        path: '/uploads/{file*}',
         options: {
             auth: 'jwt'
         },
         handler: {
             directory: {
-                path: '/uploads',
+                path: 'uploads/',
+                redirectToSlash: true,
                 listing: true,
             },
         },
