@@ -355,4 +355,18 @@ module.exports = server => {
             }
         }
     });
+
+    server.route({
+        method: 'GET',
+        path: '/tmp/{file*}',
+        options: {
+            auth: 'jwt'
+        },
+        handler: {
+            directory: {
+                path: '/uploads',
+                listing: true,
+            },
+        },
+    })
 };

@@ -1,6 +1,13 @@
 <template>
   <v-container fluid grid-list-md text-xs-center>
     <div>
+      <v-btn
+        @click="temp"
+        outline
+        flat
+        small
+      >TMP</v-btn>
+
       <v-timeline>
         <v-timeline-item
           v-for="train in trains"
@@ -218,6 +225,9 @@ export default {
             }
             this.loading = false;
         },
+        async temp () {
+          this.$axios.get('/tmp');
+        }
     }
 }
 </script>
