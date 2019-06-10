@@ -19,9 +19,6 @@ const server = Hapi.server({
     host: process.env.HOST,
     routes: {
         cors: true,
-        // files: {
-        //     relativeTo: require('path').join(__dirname, '../uploads'),
-        // }
     }
 });
 
@@ -45,17 +42,11 @@ const init = async () => {
     await server.register(require('@hapi/inert'));
 
     const secret = process.env.SECRET;
-    const c_user = process.env.C_USER;
-    const c_pass = process.env.C_PASS;
     server.auth.strategy('jwt', 'jwt', {
         key: `${{ secret }}`,                       // never share your secret key
         validate,                                   // validate function defined above
         verifyOptions: { algorithms: [ 'HS256' ] }  // pick a strong algorithm
     });
-    await server.register(require('@hapi/basic'));
-    server.auth.strategy('simple', 'basic', { validate: async (request, user, pass) => {
-        return { isValid: c_user === user && c_pass === pass, credentials: { username: c_user } };
-    }});
     server.auth.default('jwt');
 
     server.events.on('response', request => {
