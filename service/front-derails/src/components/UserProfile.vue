@@ -5,7 +5,7 @@
         <v-flex xs12>
           <v-avatar size="126">
             <img v-if="user && user.avatar" v-bind:src="avatarPath"/>
-            <img v-else src="@/assets/potato.jpg"/>
+            <img v-else src="@/assets/logo.jpg"/>
           </v-avatar>
         </v-flex>
         <v-flex xs12>
@@ -39,9 +39,6 @@
     <v-flex xs12>
       <v-btn @click="back">
         Back
-      </v-btn>
-      <v-btn>
-        Update Profile Info
       </v-btn>
     </v-flex>
 
