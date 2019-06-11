@@ -28,7 +28,7 @@ services:
       VUE_APP_API_URL: http://localhost:8888
     networks:
       derailed_network:
-        ipv6_address: fd00:1337:TEAMID:8454::1
+        ipv6_address: fd00:1337:TEAMID:dead::1
 
   back-derails:
     build: back-derails
@@ -54,7 +54,7 @@ services:
       - "8888:8888"
     networks:
       derailed_network:
-        ipv6_address: fd00:1337:TEAMID:8454::1
+        ipv6_address: fd00:1337:TEAMID:dead::1
 
 volumes:
   derailed_data: {}
@@ -65,5 +65,5 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: fd00:1337:TEAMID:8454::/64
-          gateway: fd00:1337:TEAMID:8454::ffff
+        - subnet: fd00:1337:TEAMID:dead::/64
+          gateway: fd00:1337:TEAMID:dead::ffff
