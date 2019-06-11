@@ -22,8 +22,6 @@ services:
     hostname: derailed
     container_name: front-derails
     restart: on-failure
-    ports:
-      - "8080:80"
     environment:
       VUE_APP_API_URL: http://localhost:8888
     networks:
@@ -50,8 +48,6 @@ services:
         condition: service_healthy
     links:
       - db
-    ports:
-      - "8888:8888"
     networks:
       derailed_network:
         ipv6_address: fd00:1337:TEAMID:dead::1
