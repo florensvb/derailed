@@ -12,8 +12,6 @@ exports.up = function(knex) {
 
       table.string('ticket_id');
 
-      table.unique(['user_id', 'train_id']);
-
       table.timestamps();
     })
 };

@@ -131,11 +131,7 @@ module.exports = server => {
 
             if (!user) return boom.badData('No user');
 
-            const tickets = user.related('tickets');
-
             const add = request.url.pathname === '/add-ticket';
-
-            if (add && tickets.models.find(t => t.get('train_id') === train.get('id'))) return boom.badData('Already own that ticket digga');
 
             if (add) {
                 const ticket = await Ticket.forge({
