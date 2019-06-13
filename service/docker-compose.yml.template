@@ -16,6 +16,9 @@ services:
       MYSQL_DATABASE: derailed
       MYSQL_USER: derailed
       MYSQL_PASSWORD: secretenowarsctf
+    networks:
+      derailed_network:
+        ipv6_address: fd00:1337:TEAMID:dead::3
 
   front-derails:
     build: front-derails
@@ -23,7 +26,7 @@ services:
     container_name: front-derails
     restart: on-failure
     environment:
-      VUE_APP_API_URL: http://localhost:8888
+      VUE_APP_API_URL: http://[fd00:1337:TEAMID:dead::2]:6032
     networks:
       derailed_network:
         ipv6_address: fd00:1337:TEAMID:dead::1
@@ -36,13 +39,13 @@ services:
     working_dir: /usr/src/app
     restart: on-failure
     environment:
-      HOST: 0.0.0.0
-      PORT: 8888
+      HOST: fd00:1337:TEAMID:dead::2
+      PORT: 6032
       SECRET: dontshareyoursecret
       DB_PASSWORD: secretenowarsctf
       DB_DATABASE: derailed
       DB_USER: derailed
-      DB_HOST: db
+      DB_HOST: fd00:1337:TEAMID:dead::3
     depends_on:
       db:
         condition: service_healthy
@@ -50,7 +53,7 @@ services:
       - db
     networks:
       derailed_network:
-        ipv6_address: fd00:1337:TEAMID:dead::1
+        ipv6_address: fd00:1337:TEAMID:dead::2
 
 volumes:
   derailed_data: {}
