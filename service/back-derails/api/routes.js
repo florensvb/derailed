@@ -1,6 +1,5 @@
 module.exports = server => {
     const boom = require('boom');
-    const exiftool = require("exiftool-vendored").exiftool;
     const fs = require('fs');
     const joi = require('joi');
     const md5 = require('md5');
@@ -268,7 +267,7 @@ module.exports = server => {
         method: 'GET',
         path: '/user-avatar/{id}',
         options: {
-            // auth: 'jwt',
+            auth: 'jwt',
         },
         handler: async (request, h) => {
             try {
