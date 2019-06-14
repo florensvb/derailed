@@ -31,7 +31,7 @@ class DerailedChecker(BaseChecker):
     noise_count = 1
     havoc_count = 1
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         super(DerailedChecker, self).__init__()
         self.derailed = "http://"+self.address+":"+str(self.port)
         self.jwt_token = ''
