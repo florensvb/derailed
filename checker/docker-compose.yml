@@ -1,10 +1,18 @@
 version: '2'
 services:
   derailed-backend:
+    image: 10.13.37.6:4303/derailed-backend
     build: .
     networks:
-      checkernet:
-        ipv6_address: fd00:1337:0:cecc:4::2
+      - bridge
+      - enoverlay
+    environment:
+      - MONGO_ENABLED=1
+      - MONGO_HOST=checkerdb_mongo_1
+      - MONGO_PORT=27017
+      - MONGO_USER=ipv6islove
+      - MONGO_PASSWORD=dockerislove
+
   derailed-frontend:
     image: nginx:1.13-alpine
     volumes:
@@ -12,8 +20,9 @@ services:
     depends_on:
       - derailed-backend
     networks:
-      checkernet:
-        ipv6_address: fd00:1337:0:cecc:4::1
+      - enoverlay
 networks:
-  checkernet:
+  bridge:
+    external: true
+  enoverlay:
     external: true

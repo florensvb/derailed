@@ -26,7 +26,7 @@ services:
     container_name: front-derails
     restart: on-failure
     environment:
-      VUE_APP_API_URL: http://[fd00:1337:TEAMID:dead::2]:6032
+      VUE_APP_API_URL: http://[fd00:1337:TEAMID:dead::2]:4303
     networks:
       derailed_network:
         ipv6_address: fd00:1337:TEAMID:dead::1
@@ -40,7 +40,7 @@ services:
     restart: on-failure
     environment:
       HOST: fd00:1337:TEAMID:dead::2
-      PORT: 6032
+      PORT: 4303
       SECRET: dontshareyoursecret
       DB_PASSWORD: secretenowarsctf
       DB_DATABASE: derailed
