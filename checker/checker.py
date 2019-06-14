@@ -32,10 +32,8 @@ class DerailedChecker(BaseChecker):
     havoc_count = 1
 
     def __init__(self, *args, **kwargs):
-        super(DerailedChecker, self).__init__()
+        super(DerailedChecker, self).__init__(*args, **kwargs)
         self.jwt_token = ''
-        self.registered = False
-        self.logged_in = False
 
     def url(self):
         return "http://"+self.address+":"+str(self.port)
@@ -112,7 +110,6 @@ class DerailedChecker(BaseChecker):
             if register.ok:
                 self.team_db['Username'] = username
                 self.team_db['Password'] = password
-                self.registered = True
                 self.info("Successfully registered account {}".format(username))
             else:
                 raise BrokenServiceException('Could not register')
@@ -130,7 +127,6 @@ class DerailedChecker(BaseChecker):
                 jwt_token = login.headers['authorization']
                 self.jwt_token = jwt_token
                 self.team_db['JwtToken'] = jwt_token
-                self.logged_in = True
             else:
                 self.debug("Could not login as {}, code {}".format(username, login.status_code))
                 raise BrokenServiceException("Problem occurred while logging in as {}".format(username))
@@ -138,9 +134,8 @@ class DerailedChecker(BaseChecker):
             raise EnoException("Problem occurred while logging in as {}".format(username))
 
     def add_ticket(self, noise=None):
-        if self.registered is False:
-            uname, pwd = self.register()
-            self.login(uname, pwd)
+        uname, pwd = self.register()
+        self.login(uname, pwd)
 
         header = {'User-Agent': self.http_useragent_randomize(), 'Authorization': self.jwt_token}
         if noise:
@@ -190,9 +185,8 @@ class DerailedChecker(BaseChecker):
                 raise BrokenServiceException("Flag not found in image metadata")
 
     def change_avatar(self):
-        if self.logged_in is False:
-            uname, pwd = self.register()
-            self.login(uname, pwd)
+        uname, pwd = self.register()
+        self.login(uname, pwd)
 
         header = {'User-Agent': self.http_useragent_randomize(), 'Authorization': self.jwt_token}
         files = {'avatar': open(random_image(), 'rb')}
@@ -204,9 +198,8 @@ class DerailedChecker(BaseChecker):
         pass
 
     def check_trains(self):
-        if self.registered is False:
-            uname, pwd = self.register()
-            self.login(uname, pwd)
+        uname, pwd = self.register()
+        self.login(uname, pwd)
 
         header = {'User-Agent': self.http_useragent_randomize(), 'Authorization': self.jwt_token}
         trains = requests.get(self.url() + "/trains", headers=header)
