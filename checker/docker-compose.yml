@@ -22,11 +22,11 @@ services:
     networks:
       - enoverlay
     labels:
-      - "traefik.enable=true"
-      - "traefik.backend=derailed-checker"
-      - "traefik.docker.network=enoverlay"
-      - "traefik.frontend.rule=Host:derailed.checker.enowars.com,service4.checker.enowars.com"
-      - "traefik.port=80"
+        - "traefik.enable=true"
+        - "traefik.backend=derailed-checker"
+        - "traefik.docker.network=enoverlay"
+        - "traefik.frontend.rule=Host:derailed.checker.enowars.com,service4.checker.enowars.com"
+        - "traefik.port=80"
 
 networks:
   bridge:
