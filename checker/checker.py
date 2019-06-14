@@ -34,6 +34,8 @@ class DerailedChecker(BaseChecker):
     def __init__(self, *args, **kwargs):
         super(DerailedChecker, self).__init__(*args, **kwargs)
         self.jwt_token = ''
+        self.image = ''
+        self.registered = False
 
     def url(self):
         return "http://"+self.address+":"+str(self.port)
@@ -50,7 +52,7 @@ class DerailedChecker(BaseChecker):
             elif self.flag_idx == 1:
                 username, password = self.register()
                 self.login(username, password)
-                self.input_flag_metadata()
+                self.image = self.input_flag_metadata()
                 self.change_avatar()
 
         except Exception:
@@ -62,7 +64,7 @@ class DerailedChecker(BaseChecker):
                 self.login('Conductor', self.team_db['CondPwd'])
                 self.get_tickets()
             elif self.flag_idx == 1:
-                # TODO: get pic, read metadata
+                # self.read_metadata(self.image)
                 pass
 
         except Exception:
@@ -111,6 +113,7 @@ class DerailedChecker(BaseChecker):
                 self.team_db['Username'] = username
                 self.team_db['Password'] = password
                 self.info("Successfully registered account {}".format(username))
+                self.registered = True
             else:
                 raise BrokenServiceException('Could not register')
         except requests.exceptions.ConnectionError:
@@ -134,8 +137,9 @@ class DerailedChecker(BaseChecker):
             raise EnoException("Problem occurred while logging in as {}".format(username))
 
     def add_ticket(self, noise=None):
-        uname, pwd = self.register()
-        self.login(uname, pwd)
+        if self.registered is False:
+            uname, pwd = self.register()
+            self.login(uname, pwd)
 
         header = {'User-Agent': self.http_useragent_randomize(), 'Authorization': self.jwt_token}
         if noise:
@@ -185,8 +189,9 @@ class DerailedChecker(BaseChecker):
                 raise BrokenServiceException("Flag not found in image metadata")
 
     def change_avatar(self):
-        uname, pwd = self.register()
-        self.login(uname, pwd)
+        if self.registered is False:
+            uname, pwd = self.register()
+            self.login(uname, pwd)
 
         header = {'User-Agent': self.http_useragent_randomize(), 'Authorization': self.jwt_token}
         files = {'avatar': open(random_image(), 'rb')}
