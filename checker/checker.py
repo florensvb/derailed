@@ -33,10 +33,12 @@ class DerailedChecker(BaseChecker):
 
     def __init__(self, *args, **kwargs):
         super(DerailedChecker, self).__init__()
-        self.derailed = "http://"+self.address+":"+str(self.port)
         self.jwt_token = ''
         self.registered = False
         self.logged_in = False
+
+    def url(self):
+        return "http://"+self.address+":"+str(self.port)
 
     def putflag(self):
         try:
@@ -106,7 +108,7 @@ class DerailedChecker(BaseChecker):
         header = {'User-Agent': self.http_useragent_randomize()}
 
         try:
-            register = requests.post(self.derailed + "/auth/new", data=data, headers=header)
+            register = requests.post(self.url() + "/auth/new", data=data, headers=header)
             if register.ok:
                 self.team_db['Username'] = username
                 self.team_db['Password'] = password
@@ -123,7 +125,7 @@ class DerailedChecker(BaseChecker):
         header = {'User-Agent': self.http_useragent_randomize()}
 
         try:
-            login = requests.post(self.derailed + "/auth", data=data, headers=header)
+            login = requests.post(self.url() + "/auth", data=data, headers=header)
             if login.ok:
                 jwt_token = login.headers['authorization']
                 self.jwt_token = jwt_token
@@ -146,14 +148,14 @@ class DerailedChecker(BaseChecker):
         else:
             data = {'train_id': random_train_id(), 'ticket_id': self.flag}
 
-        ticket_flag = requests.post(self.derailed + "/add-ticket", data=data, headers=header)
+        ticket_flag = requests.post(self.url() + "/add-ticket", data=data, headers=header)
         if not ticket_flag.ok:
             raise BrokenServiceException("Could not add a ticket with the flag")
 
     def get_tickets(self):
         header = {'User-Agent': self.http_useragent_randomize(), 'Authorization': self.jwt_token}
         try:
-            g = requests.get(self.derailed + "/my-tickets", headers=header)
+            g = requests.get(self.url() + "/my-tickets", headers=header)
             if self.flag not in g.text:
                 raise BrokenServiceException("Flag not found")
             if not g.ok:
@@ -167,12 +169,25 @@ class DerailedChecker(BaseChecker):
         }
         exif_dict = {"0th": zeroth_ifd}
         exit_bytes = piexif.dump(exif_dict)
-        image = random_image()
+        try:
+            image = random_image()
+        except IOError:
+            self.debug("Image not found")
+
         jpg_img = Image.open(image)
         jpg_img.save(image, exif=exit_bytes)
+        return image
 
-    def read_metadata(self):
-        pass
+    def read_metadata(self, image):
+        exif_dict = piexif.load(image)
+        print("0th: ", exif_dict['0th'])
+        for k, v in exif_dict['0th'].items():
+            if v.decode("utf-8") == self.flag:
+                self.info("Flag successfully retrieved from metadata")
+                break
+            else:
+                self.info("Flag not found in image metadata")
+                raise BrokenServiceException("Flag not found in image metadata")
 
     def change_avatar(self):
         if self.logged_in is False:
@@ -181,11 +196,11 @@ class DerailedChecker(BaseChecker):
 
         header = {'User-Agent': self.http_useragent_randomize(), 'Authorization': self.jwt_token}
         files = {'avatar': open(random_image(), 'rb')}
-        requests.post(self.derailed + "/user-avatar", files=files, headers=header)
+        requests.post(self.url() + "/user-avatar", files=files, headers=header)
 
     def get_avatar(self):
         # header = {'User-Agent': self.http_useragent_randomize(), 'Authorization': self.jwt_token}
-        # g = requests.get(self.derailed + "/user-profile", headers=header, stream=True)
+        # g = requests.get(self.url() + "/user-profile", headers=header, stream=True)
         pass
 
     def check_trains(self):
@@ -194,7 +209,7 @@ class DerailedChecker(BaseChecker):
             self.login(uname, pwd)
 
         header = {'User-Agent': self.http_useragent_randomize(), 'Authorization': self.jwt_token}
-        trains = requests.get(self.derailed + "/trains", headers=header)
+        trains = requests.get(self.url() + "/trains", headers=header)
 
         if trains.text.count('id') != 9:
             raise BrokenServiceException("Number of trains does not match")
@@ -209,4 +224,3 @@ class DerailedChecker(BaseChecker):
 app = DerailedChecker.service
 if __name__ == "__main__":
     run(DerailedChecker)
-
