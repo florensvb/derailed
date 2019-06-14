@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import random
 import string
 import requests
@@ -30,12 +31,10 @@ class DerailedChecker(BaseChecker):
     flag_count = 1
     noise_count = 1
     havoc_count = 1
-
-    def __init__(self, *args, **kwargs):
-        super(DerailedChecker, self).__init__(*args, **kwargs)
-        self.jwt_token = ''
-        self.image = ''
-        self.registered = False
+    service_name = 'derailed'
+    jwt_token = ''
+    image = ''
+    registered = False
 
     def url(self):
         return "http://"+self.address+":"+str(self.port)
@@ -56,7 +55,7 @@ class DerailedChecker(BaseChecker):
                 self.change_avatar()
 
         except Exception:
-            raise EnoException(Exception)
+            raise BrokenServiceException("Test")
 
     def getflag(self):
         try:
@@ -68,7 +67,7 @@ class DerailedChecker(BaseChecker):
                 pass
 
         except Exception:
-            raise EnoException(Exception)
+            raise BrokenServiceException(Exception)
 
     def putnoise(self):
         rand_place = random.randint(0, 0)  # 0, 2
@@ -134,7 +133,7 @@ class DerailedChecker(BaseChecker):
                 self.debug("Could not login as {}, code {}".format(username, login.status_code))
                 raise BrokenServiceException("Problem occurred while logging in as {}".format(username))
         except Exception:
-            raise EnoException("Problem occurred while logging in as {}".format(username))
+            raise BrokenServiceException("Problem occurred while logging in as {}".format(username))
 
     def add_ticket(self, noise=None):
         if self.registered is False:
@@ -160,7 +159,7 @@ class DerailedChecker(BaseChecker):
             if not g.ok:
                 raise BrokenServiceException("Could not retrieve tickets")
         except Exception:
-            raise EnoException("Problem occurred while retrieving own ticket")
+            raise BrokenServiceException("Problem occurred while retrieving own ticket")
 
     def input_flag_metadata(self):
         zeroth_ifd = {
@@ -215,7 +214,9 @@ class DerailedChecker(BaseChecker):
             raise BrokenServiceException("Could not get trains")
 
     def check_conductor_account(self):
-        if not self.team_db['Conductor']:
+        try:
+            self.team_db['Conductor']
+        except KeyError:
             raise BrokenServiceException("Conductor account not found in db")
 
 

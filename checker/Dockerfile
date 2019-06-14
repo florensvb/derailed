@@ -13,7 +13,7 @@ RUN pip3 install -r requirements.txt
 COPY ./uwsgi.ini uwsgi.ini
 COPY ./checker.py checker.py
 
-
+#ENTRYPOINT ["tail", "-f", "/dev/null"]
 ENTRYPOINT [ "uwsgi", "--uid", "uwsgi", \
                "--socket", "[::]:3031", \
                "--protocol", "uwsgi", \
