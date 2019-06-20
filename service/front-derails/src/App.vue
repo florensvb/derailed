@@ -27,10 +27,7 @@
     >
       <v-card class="text-xs-center">
         <v-card-text>
-          I am the<b> conductor</b>.
-        </v-card-text>
-        <v-card-text>
-          And I am twelve years old.
+          The<b> Conductor</b> is here. Do you have a ticket yet?
         </v-card-text>
       </v-card>
     </v-dialog>

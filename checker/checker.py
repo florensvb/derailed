@@ -1,20 +1,20 @@
-#!/usr/bin/env python3
 import random
 import string
 import requests
 import piexif
+import json
+import io
 from PIL import Image
-
 from enochecker import *
 
 
 def random_username():
-    return ''.join(random.choice(string.ascii_letters) for i in range(20))
+    return ''.join(random.choice(string.ascii_letters) for _ in range(0, 15))
 
 
 def random_password():
     rand_symbols = string.ascii_letters + string.digits
-    return ''.join(random.choice(rand_symbols) for i in range(20))
+    return ''.join(random.choice(rand_symbols) for _ in range(0, 15))
 
 
 def random_image():
@@ -28,8 +28,8 @@ def random_train_id():
 
 class DerailedChecker(BaseChecker):
     port = 4303
-    flag_count = 1
-    noise_count = 1
+    flag_count = 2
+    noise_count = 2
     havoc_count = 1
     service_name = 'derailed'
     jwt_token = ''
@@ -41,7 +41,7 @@ class DerailedChecker(BaseChecker):
 
     def putflag(self):
         try:
-            if self.round == 0:
+            if self.round == 1:
                 pwd = self.register('Conductor')[1]
                 self.team_db['CondPwd'] = pwd
 
@@ -51,42 +51,59 @@ class DerailedChecker(BaseChecker):
             elif self.flag_idx == 1:
                 username, password = self.register()
                 self.login(username, password)
-                self.image = self.input_flag_metadata()
-                self.change_avatar()
-
-        except Exception:
-            raise BrokenServiceException("Test")
+                image = self.input_flag_metadata()
+                self.team_db['image'] = {"img": image, "username": username, "password": password}
+                self.change_avatar(image)
+        except KeyError:
+            return BrokenServiceException("Key Error")
+        except OfflineException:
+            raise BrokenServiceException("Service Offline")
 
     def getflag(self):
         try:
             if self.flag_idx == 0:
                 self.login('Conductor', self.team_db['CondPwd'])
                 self.get_tickets()
+                self.info("Flag found!")
             elif self.flag_idx == 1:
-                # self.read_metadata(self.image)
-                pass
-
-        except Exception:
-            raise BrokenServiceException(Exception)
+                avatar = self.team_db['image']["img"]
+                username = self.team_db['image']["username"]
+                password = self.team_db['image']["password"]
+                self.login(username, password)
+                image = self.get_avatar()
+                # self.read_metadata(image)
+                self.info("Flag found!")
+        except KeyError:
+            raise BrokenServiceException("Key Error")
+        except OfflineException:
+            raise BrokenServiceException("Service Offline")
 
     def putnoise(self):
         rand_place = random.randint(0, 0)  # 0, 2
-        if rand_place == 0:
-            noise = random_username()*4
-            username, password = self.register()
-            self.login(username, password)
-            self.add_ticket(noise)
-        elif rand_place == 1:
-            pass
-        elif rand_place == 2:
-            pass
+        try:
+            if rand_place == 0:
+                username, password = self.register()
+                self.login(username, password)
+                self.add_ticket(self.noise)
+            elif rand_place == 1:
+                pass
+            elif rand_place == 2:
+                pass
+        except OfflineException:
+            raise BrokenServiceException("Service Offline")
 
     def getnoise(self):
-        pass
+        try:
+            pass
+        except OfflineException:
+            raise BrokenServiceException("Service Offline")
 
     def havoc(self):
-        methods = [self.register, self.check_trains, self.check_conductor_account, self.change_avatar]
-        random.choice(methods)()
+        try:
+            methods = [self.check_trains, self.check_conductor_account]
+            random.choice(methods)()
+        except OfflineException:
+            raise BrokenServiceException("Service Offline")
 
     def exploit(self):
         pass
@@ -105,7 +122,6 @@ class DerailedChecker(BaseChecker):
 
         data = {'username': username, 'password': password}
         header = {'User-Agent': self.http_useragent_randomize()}
-
         try:
             register = requests.post(self.url() + "/auth/new", data=data, headers=header)
             if register.ok:
@@ -114,6 +130,8 @@ class DerailedChecker(BaseChecker):
                 self.info("Successfully registered account {}".format(username))
                 self.registered = True
             else:
+                if register.status_code == 422:
+                    self.debug("User {} already exists in db".format(username))
                 raise BrokenServiceException('Could not register')
         except requests.exceptions.ConnectionError:
             raise OfflineException
@@ -128,10 +146,11 @@ class DerailedChecker(BaseChecker):
             if login.ok:
                 jwt_token = login.headers['authorization']
                 self.jwt_token = jwt_token
-                self.team_db['JwtToken'] = jwt_token
             else:
                 self.debug("Could not login as {}, code {}".format(username, login.status_code))
                 raise BrokenServiceException("Problem occurred while logging in as {}".format(username))
+        except KeyError:
+            raise BrokenServiceException("Key Error")
         except Exception:
             raise BrokenServiceException("Problem occurred while logging in as {}".format(username))
 
@@ -171,14 +190,17 @@ class DerailedChecker(BaseChecker):
             image = random_image()
         except IOError:
             self.debug("Image not found")
+            return KeyError
 
         jpg_img = Image.open(image)
         jpg_img.save(image, exif=exit_bytes)
         return image
 
     def read_metadata(self, image):
-        exif_dict = piexif.load(image)
-        print("0th: ", exif_dict['0th'])
+        try:
+            exif_dict = piexif.load(image)
+        except FileNotFoundError:
+            raise BrokenServiceException("Image not found")
         for k, v in exif_dict['0th'].items():
             if v.decode("utf-8") == self.flag:
                 self.info("Flag successfully retrieved from metadata")
@@ -187,19 +209,24 @@ class DerailedChecker(BaseChecker):
                 self.info("Flag not found in image metadata")
                 raise BrokenServiceException("Flag not found in image metadata")
 
-    def change_avatar(self):
-        if self.registered is False:
-            uname, pwd = self.register()
-            self.login(uname, pwd)
-
+    def change_avatar(self, image):
         header = {'User-Agent': self.http_useragent_randomize(), 'Authorization': self.jwt_token}
-        files = {'avatar': open(random_image(), 'rb')}
-        requests.post(self.url() + "/user-avatar", files=files, headers=header)
+        files = {'avatar': open(image, 'rb')}
+        upload_avatar = requests.post(self.url() + "/user-avatar", files=files, headers=header)
+        if not upload_avatar.ok:
+            raise BrokenServiceException("Could not upload flag image")
 
     def get_avatar(self):
-        # header = {'User-Agent': self.http_useragent_randomize(), 'Authorization': self.jwt_token}
-        # g = requests.get(self.url() + "/user-profile", headers=header, stream=True)
-        pass
+        header = {'User-Agent': self.http_useragent_randomize(), 'Authorization': self.jwt_token}
+        get = requests.get(self.url() + "/user-profile", headers=header)
+        image_info = get.content.decode("utf-8")
+        image_name = json.loads(image_info)["avatar"]
+        get_avatar = requests.get(self.url() + "/uploads/" + image_name, headers=header)
+        image_bytes = get_avatar.content
+        image = Image.open(io.BytesIO(image_bytes))
+        size = image.size
+        image.save("test.jpg")
+        return image
 
     def check_trains(self):
         uname, pwd = self.register()
@@ -214,10 +241,12 @@ class DerailedChecker(BaseChecker):
             raise BrokenServiceException("Could not get trains")
 
     def check_conductor_account(self):
-        try:
-            self.team_db['Conductor']
-        except KeyError:
-            raise BrokenServiceException("Conductor account not found in db")
+        if self.round > 1:
+            try:
+                self.team_db['Conductor']
+            except KeyError:
+                self.register('Conductor')
+                raise BrokenServiceException("Conductor account not found in db")
 
 
 app = DerailedChecker.service
