@@ -41,9 +41,9 @@ class DerailedChecker(BaseChecker):
 
     def putflag(self):
         try:
-            if self.round == 1:
-                pwd = self.register('Conductor')[1]
-                self.team_db['CondPwd'] = pwd
+            # if self.round == 1:
+            pwd = self.register('Conductor')[1]
+            self.team_db['CondPwd'] = pwd
 
             if self.flag_idx == 0:
                 self.login('Conductor', self.team_db['CondPwd'])
@@ -131,6 +131,8 @@ class DerailedChecker(BaseChecker):
                 self.registered = True
             elif register.status_code == 422:
                 self.debug("User {} already exists in db".format(username))
+                password = self.team_db['CondPwd']
+                self.registered = True
             else:
                 raise BrokenServiceException('Could not register')
         except requests.exceptions.ConnectionError:
