@@ -55,9 +55,7 @@ class DerailedChecker(BaseChecker):
                 self.team_db['image'] = {"img": image, "username": username, "password": password}
                 self.change_avatar(image)
         except KeyError:
-            return BrokenServiceException("Key Error")
-        except OfflineException:
-            raise BrokenServiceException("Service Offline")
+            raise BrokenServiceException()
 
     def getflag(self):
         try:
@@ -190,7 +188,6 @@ class DerailedChecker(BaseChecker):
             image = random_image()
         except IOError:
             self.debug("Image not found")
-            return KeyError
 
         jpg_img = Image.open(image)
         jpg_img.save(image, exif=exit_bytes)
