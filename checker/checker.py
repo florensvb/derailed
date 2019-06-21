@@ -55,7 +55,9 @@ class DerailedChecker(BaseChecker):
                 self.team_db['image'] = {"img": image, "username": username, "password": password}
                 self.change_avatar(image)
         except KeyError:
-            raise BrokenServiceException()
+            raise BrokenServiceException("Key Error")
+        except requests.exceptions.ConnectionError:
+            raise OfflineException
 
     def getflag(self):
         try:
@@ -73,8 +75,8 @@ class DerailedChecker(BaseChecker):
                 self.info("Flag found!")
         except KeyError:
             raise BrokenServiceException("Key Error")
-        except OfflineException:
-            raise BrokenServiceException("Service Offline")
+        except requests.exceptions.ConnectionError:
+            raise OfflineException
 
     def putnoise(self):
         rand_place = random.randint(0, 0)  # 0, 2
@@ -87,21 +89,21 @@ class DerailedChecker(BaseChecker):
                 pass
             elif rand_place == 2:
                 pass
-        except OfflineException:
-            raise BrokenServiceException("Service Offline")
+        except requests.exceptions.ConnectionError:
+            raise OfflineException
 
     def getnoise(self):
         try:
             pass
-        except OfflineException:
-            raise BrokenServiceException("Service Offline")
+        except requests.exceptions.ConnectionError:
+            raise OfflineException
 
     def havoc(self):
         try:
             methods = [self.check_trains, self.check_conductor_account]
             random.choice(methods)()
-        except OfflineException:
-            raise BrokenServiceException("Service Offline")
+        except requests.exceptions.ConnectionError:
+            raise OfflineException
 
     def exploit(self):
         pass
@@ -127,9 +129,9 @@ class DerailedChecker(BaseChecker):
                 self.team_db['Password'] = password
                 self.info("Successfully registered account {}".format(username))
                 self.registered = True
+            elif register.status_code == 422:
+                self.debug("User {} already exists in db".format(username))
             else:
-                if register.status_code == 422:
-                    self.debug("User {} already exists in db".format(username))
                 raise BrokenServiceException('Could not register')
         except requests.exceptions.ConnectionError:
             raise OfflineException
