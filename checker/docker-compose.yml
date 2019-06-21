@@ -1,33 +1,33 @@
-version: '3'
+version: '3.6'
 services:
   derailed-backend:
-    image: 10.13.37.7:5000/derailed-backend
     build: .
-    networks:
-      - bridge
-      - enoverlay
     environment:
-      - MONGO_ENABLED=1
-      - MONGO_HOST=checkerdb_mongo_1
-      - MONGO_PORT=27017
-      - MONGO_USER=ipv6islove
-      - MONGO_PASSWORD=dockerislove
-
-  derailed-frontend:
-    image: nginx:1.13-alpine
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-    depends_on:
-      - derailed-backend
+    - MONGO_ENABLED=1
+    - MONGO_HOST=checkerdb_mongo_1
+    - MONGO_PORT=27017
+    - MONGO_USER=ipv6islove
+    - MONGO_PASSWORD=dockerislove
+    image: 10.13.37.7:5000/derailed-backend
     networks:
-      - enoverlay
-    labels:
-        - "traefik.enable=true"
-        - "traefik.backend=derailed-checker"
-        - "traefik.docker.network=enoverlay"
-        - "traefik.frontend.rule=Host:derailed.checker.enowars.com,service4.checker.enowars.com"
-        - "traefik.port=80"
-
+    - bridge
+    - enoverlay
+  derailed-frontend:
+    depends_on:
+    - derailed-backend
+    deploy:
+      labels:
+      - traefik.enable=true
+      - traefik.backend=derailed-checker
+      - traefik.docker.network=enoverlay
+      - traefik.frontend.rule=Host:derailed.checker.enowars.com,service4.checker.enowars.com
+      - traefik.port=80
+      replicas: 1
+    image: nginx:1.13-alpine
+    networks:
+    - enoverlay
+    volumes:
+    - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
 networks:
   bridge:
     external: true
