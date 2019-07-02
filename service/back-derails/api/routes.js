@@ -16,7 +16,6 @@ module.exports = server => {
     const password = joi.string().alphanum().min(7).max(30).required();
     const username = joi.string().required();
 
-    // Sign up
     server.route({
         method: 'POST',
         path: '/auth/new',
@@ -187,7 +186,6 @@ module.exports = server => {
     };
 
     const jwt = require('jsonwebtoken');
-    // Sign in
     server.route({
         method: 'POST',
         path: '/auth',
