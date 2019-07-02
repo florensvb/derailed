@@ -38,9 +38,9 @@ services:
       HOST: 0.0.0.0
       PORT: 8888
       SECRET: dontshareyoursecret
-      DB_PASSWORD: secretenowarsctf
+      DB_PASSWORD: secretenowarsrails
       DB_DATABASE: derailed
-      DB_USER: derailed
+      DB_USER: root
       DB_HOST: db
     depends_on:
       db:

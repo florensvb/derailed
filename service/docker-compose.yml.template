@@ -42,9 +42,9 @@ services:
       HOST: fd00:1337:TEAMID:dead::2
       PORT: 4303
       SECRET: dontshareyoursecret
-      DB_PASSWORD: secretenowarsctf
+      DB_PASSWORD: secretenowarsrails
       DB_DATABASE: derailed
-      DB_USER: derailed
+      DB_USER: root
       DB_HOST: fd00:1337:TEAMID:dead::3
     depends_on:
       db:
